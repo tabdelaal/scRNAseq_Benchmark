@@ -1,0 +1,7 @@
+name: test2
+channels:
+- conda-forge
+- bioconda
+- defaults
+dependencies:
+- r==3.5.1
