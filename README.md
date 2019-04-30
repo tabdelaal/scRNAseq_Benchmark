@@ -21,7 +21,7 @@ docker run \
 #### Outside of docker
 This will require
 [snakemake](https://snakemake.readthedocs.io/en/stable/index.html) and
-[conda](conda.pydata.org/miniconda.html) to be available on your system.
+[conda](https://conda.pydata.org/miniconda.html) to be available on your system.
 ```
 snakemake \
   --snakefile <path to this repo's Snakefile> \
