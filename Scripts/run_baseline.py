@@ -67,7 +67,7 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile):
         truelab = []
         pred = []
         
-        for i in range(nfolds):
+        for i in range(np.squeeze(nfolds)):
             test_ind_i = np.array(test_ind[i], dtype = 'int')
             train_ind_i = np.array(train_ind[i], dtype = 'int')
     
