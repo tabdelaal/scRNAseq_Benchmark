@@ -1,7 +1,0 @@
-name: test
-channels:
-- conda-forge
-- bioconda
-- defaults
-dependencies:
-- htseq==0.9.1

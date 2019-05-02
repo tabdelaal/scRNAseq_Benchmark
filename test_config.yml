@@ -1,4 +1,0 @@
-dataset: "/inputs/test_config.yml"
-tools_to_run:
-  - test
-  - test2

@@ -1,15 +1,16 @@
 FROM continuumio/miniconda3:4.5.12
 WORKDIR /benchmark
-COPY . ./
+COPY Environments/ Environments/
+COPY Scripts/ Scripts/
+COPY Snakefile Snakefile
+COPY Build_scripts/ Build_scripts/
 
-RUN conda install snakemake=5.4.5 -c bioconda -c conda-forge
+RUN mkdir workspace
+RUN apt-get update && apt-get install libgfortran3 --yes
+RUN conda install snakemake=5.4.5 -c bioconda -c conda-forge --yes
 
-## The following would likely decrease runtime, as all packages will be cached
-## so they won't have to be downloaded. It will also, however, greatly increase
-## the size of the image and build time.
-#RUN for ENVYML in $(ls environments/*.yml); do \
-#      conda env create -f "$ENVYML"; \
-#    done && \
-#    conda env list | cut -f1 -d' ' | tail -n +3 > installed-tools
+# Create the environments
+RUN ENVIRONMENTS=$(ls Environments/ | sed 's/$/_environment_created/' | sed 's/^/Build_scripts\/\./') && \
+    snakemake --use-conda --snakefile Build_scripts/Snakefile $ENVIRONMENTS
 
-ENTRYPOINT ["snakemake"]
+ENTRYPOINT ["snakemake", "--use-conda"]

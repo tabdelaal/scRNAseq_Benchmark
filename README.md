@@ -11,10 +11,10 @@ Benchmarking classification tools for scRNA-seq data
 This will require docker to be available on your system.
 ```
 docker run \
-  -v <where the output should be place>:/benchmark/workspace \
-  -v <where the inputs are>:/inputs \
+  -v <where the output should end up>:<Output folder specified in the config> \
+  -v <where the inputs are>:<inputs folder specified in the config> \
   benchmark-sc-classifiers \
-  --configfile <config_file> \
+  --configfile <config file> \
   <optionally additional snakemake flags>
 ```
 
@@ -26,19 +26,31 @@ This will require
 snakemake \
   --snakefile <path to this repo's Snakefile> \
   --configfile <configfile> \
+  --use-conda \
   <optionally additional snakemake flags>
 ```
 
 #### The config file
 ```YML
-dataset: <path to dataset>
-tools_to_use: # tools to use
+input_dir: <path to inputs directory>
+output_dir: <path to outputs directory>
+datafile: <path to csv file with counts per cell>
+labfile: <csv with true labels per cell>
+folds: <Rdata file defining cross-validation folds>
+tools_to_run: # List of tools to run
   - <tool 1>
   - <tool 2>
-```
+  - <...>
 
-## Included tools
-- TBD
+```
+<!-- TODO explain these input files -->
+
+## Included tools/methods
+- kNN
+- LDA
+- NMC
+- RF
+- SVM
 
 ## Adding new tools
 #### Write a wrapper script
@@ -53,7 +65,7 @@ tools_to_use: # tools to use
    1. Make sure the wrapper script is named exactly the same way as the tool
       will be in listed in the config file. Ending in the appropriate extension
       for the used language: `.R` for R and `.py` for python.
-1. Add a conda environment YAML to the `environments/` folder.
+1. Add a conda environment YAML to the `Environments/` folder.
    1. Make sure environment YAML is named exactly the same way as the tool
       will be in listed in the config file. Ending with the `.yml` extension.
    1. Make sure that the environment contains all dependencies for both the
