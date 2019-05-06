@@ -1,5 +1,6 @@
 Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath){
   Data <- read.csv(DataPath,row.names = 1)
+  colnames(Data) <- gsub('_','.',colnames(Data), fixed = TRUE)
   Labels <- as.matrix(read.csv(LabelsPath))
   load(CV_RDataPath)
   Labels <- as.vector(Labels[,col_Index])
@@ -47,6 +48,6 @@ Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath){
   Testing_Time_singleCellNet <- as.vector(unlist(Testing_Time_singleCellNet))
   write.csv(True_Labels_singleCellNet,'True_Labels_singleCellNet.csv',row.names = FALSE)
   write.csv(Pred_Labels_singleCellNet,'Pred_Labels_singleCellNet.csv',row.names = FALSE)
-  write.csv(Training_Time_singleCellNet,'Training_Time_CaSTLe.csv',row.names = FALSE)
+  write.csv(Training_Time_singleCellNet,'Training_Time_singleCellNet.csv',row.names = FALSE)
   write.csv(Testing_Time_singleCellNet,'Testing_Time_singleCellNet.csv',row.names = FALSE)
 }
