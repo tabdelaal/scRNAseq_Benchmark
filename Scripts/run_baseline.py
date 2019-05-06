@@ -94,22 +94,19 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile):
             
             truelab.extend(y_test.values)
             pred.extend(predicted)
-        
-        mean_tr = np.mean(tr_time)
-        mean_ts = np.mean(ts_time)
-        
+                
         truelab = pd.DataFrame(truelab)
         pred = pd.DataFrame(pred)
+        
+        tr_time = pd.DataFrame(tr_time)
+        ts_time = pd.DataFrame(ts_time)
             
-        truelab.to_csv(c + "_" + str(col) + "_true.csv", index = False, header = False)
-        pred.to_csv(c + "_" + str(col) + "_pred.csv", index = False, header = False)
+        truelab.to_csv(c + "_" + str(col) + "_true.csv", index = False)
+        pred.to_csv(c + "_" + str(col) + "_pred.csv", index = False)
+        
+        tr_time.to_csv(c + "_" + str(col) + "_training_time.csv", index = False)
+        ts_time.to_csv(c + "_" + str(col) + "_test_time.csv", index = False)
     
-        with open(c + "_" + str(col) + "_training_time.csv", 'w') as f:
-            f.write("%f\n" % mean_tr)
-    
-        with open(c + "_" + str(col) + "_test_time.csv", 'w') as f:
-            f.write("%f\n" % mean_ts)
-
 
 
 
