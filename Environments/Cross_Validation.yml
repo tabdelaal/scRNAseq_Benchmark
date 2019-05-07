@@ -1,0 +1,7 @@
+name: Cross_Validation
+channels:
+- conda-forge
+- bioconda
+- defaults
+dependencies:
+- r-base==3.5.1

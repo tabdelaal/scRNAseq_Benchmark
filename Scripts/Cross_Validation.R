@@ -1,12 +1,14 @@
-Cross_Validation <- function(LabelsFilePath, col_Index){
-  
+args <- commandArgs(TRUE)
+
+Cross_Validation <- function(LabelsFilePath, col_Index, output_dir){
+
   Labels <- as.matrix(read.csv(LabelsFilePath))
   Labels <- as.vector(Labels[,col_Index])
-  
+
   Removed_classes <- !(table(Labels) > 10)
   Cells_to_Keep <- !(is.element(Labels,names(Removed_classes)[Removed_classes]))
   Labels <- Labels[Cells_to_Keep]
-  
+
   # Getting training and testing Folds
   library(rBayesianOptimization)
   n_folds = 5
@@ -21,5 +23,7 @@ Cross_Validation <- function(LabelsFilePath, col_Index){
     Test_Idx[i] <- Folds[Test_Folds[i]]
   }
   remove(Temp_Folds,i,Folds)
-  save(n_folds,Train_Idx,Test_Idx,col_Index,Cells_to_Keep,file = 'CV_folds.RData')
+  save(n_folds,Train_Idx,Test_Idx,col_Index,Cells_to_Keep,file = paste0(output_dir, '/CV_folds.RData'))
 }
+
+Cross_Validation(args[1], as.numeric(args[2]), args[3])

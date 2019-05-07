@@ -105,11 +105,11 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile,
         pred = pd.DataFrame(pred)
 
         #FIXME why is `str(col)` added to the paths here?
-        truelab.to_csv(c + "_" + str(col) + "_true.csv", index = False, header = False)
-        pred.to_csv(c + "_" + str(col) + "_pred.csv", index = False, header = False)
+        truelab.to_csv(c +  "_true.csv", index = False, header = False)
+        pred.to_csv(c + "_pred.csv", index = False, header = False)
 
-        with open(c + "_" + str(col) + "_training_time.csv", 'w') as f:
+        with open(c + "_training_time.csv", 'w') as f:
             f.write("%f\n" % mean_tr)
 
-        with open(c + "_" + str(col) + "_test_time.csv", 'w') as f:
+        with open(c + "_test_time.csv", 'w') as f:
             f.write("%f\n" % mean_ts)

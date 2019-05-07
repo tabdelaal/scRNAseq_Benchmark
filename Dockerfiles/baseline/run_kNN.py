@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from sys import argv
 
 from run_baseline import run_baseline

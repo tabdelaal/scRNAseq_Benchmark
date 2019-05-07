@@ -1,0 +1,8 @@
+name: castle
+channels:
+- conda-forge
+- bioconda
+- defaults
+dependencies:
+- r-xgboost==0.82
+- r-igraph==1.2.4.1
