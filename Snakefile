@@ -1,3 +1,5 @@
+#TODO replace all 'latest' tags with actual verions
+
 rule all:
   input:
     "{}/final_report".format(config["output_dir"])
@@ -6,7 +8,7 @@ rule all:
 Rule for creating cross validation folds
 """
 rule folds:
-  input: "{}/{}".format(config["input_dir"], config["labfile"]),
+  input: config["labfile"],
   output: "{output_dir}/CV_folds.RData"
   log: "{output_dir}/CV_folds.log"
   params:
@@ -18,29 +20,27 @@ rule folds:
     "{params.column} "
     "{wildcards.output_dir} &> {log}"
 
-
 """
 Rule for R based tools.
 """
-rule run_R_wrapper:
+rule singleCellNet:
   input:
-    datafile = "{}/{}".format(config["input_dir"], config["datafile"]),
-    labfile = "{}/{}".format(config["input_dir"], config["labfile"]),
+    datafile = config["datafile"],
+    labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
-    wrapper="Scripts/Run_{tool}.R"
   output:
-    pred = "{output_dir}/{tool}/{tool}_pred.csv",
-    true = "{output_dir}/{tool}/{tool}_true.csv",
-    test_time = "{output_dir}/{tool}/{tool}_test_time.csv",
-    training_time = "{output_dir}/{tool}/{tool}_training_time.csv"
-  conda: "Environments/{tool}.yml"
-  log: "{output_dir}/{tool}{tool}.log"
+    pred = "{output_dir}/singleCellNet/singleCellNet_pred.csv",
+    true = "{output_dir}/singleCellNet/singleCellNet_true.csv",
+    test_time = "{output_dir}/singleCellNet/singleCellNet_test_time.csv",
+    training_time = "{output_dir}/singleCellNet/singleCellNet_training_time.csv"
+  log: "{output_dir}/singleCellNet/singleCellNet.log"
+  singularity: "docker://scrnaseqbenchmark/singlecellnet:latest"
   shell:
-    "Rscript Scripts/Run_{wildcards.tool}.R "
+    "Rscript Scripts/Run_singleCellNet.R "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{wildcards.output_dir}/{wildcards.tool} &> {log}"
+    "{wildcards.output_dir}/singleCellNet &> {log}"
 
 
 """
@@ -48,9 +48,8 @@ Rules for python based tools.
 """
 rule kNN:
   input:
-    input_dir = config["input_dir"],
-    datafile = "{}/{}".format(config["input_dir"], config["datafile"]),
-    labfile = "{}/{}".format(config["input_dir"], config["labfile"]),
+    datafile = config["datafile"],
+    labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
   output:
     pred = "{output_dir}/kNN/kNN_pred.csv",
@@ -68,9 +67,8 @@ rule kNN:
 
 rule LDA:
   input:
-    input_dir = config["input_dir"],
-    datafile = "{}/{}".format(config["input_dir"], config["datafile"]),
-    labfile = "{}/{}".format(config["input_dir"], config["labfile"]),
+    datafile = config["datafile"],
+    labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
   output:
     pred = "{output_dir}/LDA/LDA_pred.csv",
@@ -88,9 +86,8 @@ rule LDA:
 
 rule NMC:
   input:
-    input_dir = config["input_dir"],
-    datafile = "{}/{}".format(config["input_dir"], config["datafile"]),
-    labfile = "{}/{}".format(config["input_dir"], config["labfile"]),
+    datafile = config["datafile"],
+    labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
   output:
     pred = "{output_dir}/NMC/NMC_pred.csv",
@@ -108,9 +105,8 @@ rule NMC:
 
 rule RF:
   input:
-    input_dir = config["input_dir"],
-    datafile = "{}/{}".format(config["input_dir"], config["datafile"]),
-    labfile = "{}/{}".format(config["input_dir"], config["labfile"]),
+    datafile = config["datafile"],
+    labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
   output:
     pred = "{output_dir}/RF/RF_pred.csv",
@@ -128,9 +124,8 @@ rule RF:
 
 rule SVM:
   input:
-    input_dir = config["input_dir"],
-    datafile = "{}/{}".format(config["input_dir"], config["datafile"]),
-    labfile = "{}/{}".format(config["input_dir"], config["labfile"]),
+    datafile = config["datafile"],
+    labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
   output:
     pred = "{output_dir}/SVM/SVM_pred.csv",

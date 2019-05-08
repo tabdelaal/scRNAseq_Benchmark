@@ -100,13 +100,15 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
         pred = pd.DataFrame(pred)
 
         output_dir = Path(output_dir)
-        truelab.to_csv(str(output_dir / Path(f"{c}_true.csv")),
+        truelab.to_csv(str(output_dir / Path("{}_true.csv".format(c))),
                        index = False, header = False)
-        pred.to_csv(str(output_dir / Path(f"{c}_pred.csv")),
+        pred.to_csv(str(output_dir / Path("{}_pred.csv".format(c))),
                     index = False, header = False)
 
-        with (output_dir / Path(f"{c}_training_time.csv")).open(mode="w") as f:
+        with (output_dir /
+              Path("{}_training_time.csv".format(c))).open(mode="w") as f:
             f.write("%f\n" % mean_tr)
 
-        with (output_dir / Path(f"{c}_test_time.csv")).open(mode="w") as f:
+        with (output_dir /
+              Path("{}_test_time.csv".format(c))).open(mode="w") as f:
             f.write("%f\n" % mean_ts)
