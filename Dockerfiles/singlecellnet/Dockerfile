@@ -12,17 +12,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install python
-RUN apt-get update && \
-    apt-get install --no-install-recommends --yes python3 python3-pip && \
-    pip3 --no-cache-dir install setuptools && \
-    pip3 --no-cache-dir install pandas rpy2 scikit-learn && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY Scripts/run_baseline.py \
-     Scripts/run_kNN.py \
-     Scripts/run_LDA.py \
-     Scripts/run_NMC.py \
-     Scripts/run_RF.py \
-     Scripts/run_SVM.py \
+COPY Scripts/Run_singleCellNet.R \
+     Dockerfiles/singlecellnet/install_packages.R \
      /Scripts/
+
+# Install R packages
+RUN apt-get update && \
+    apt-get install --no-install-recommends --yes make gcc libc6-dev g++ libcurl4-openssl-dev zlib1g-dev libssl-dev r-base-dev && \
+    Rscript --vanilla /Scripts/install_packages.R && \
+    apt-get purge --yes make gcc g++ zlib1g-dev libcurl4-openssl-dev libc6-dev libssl-dev r-base-dev && \
+    apt-get autoremove --yes && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
