@@ -10,8 +10,8 @@ rule folds:
   output: "{output_dir}/CV_folds.RData"
   log: "{output_dir}/CV_folds.log"
   params:
-    column = config["column"]
-  conda: "Environments/Cross_Validation.yml"
+    column = config.get("column", 1) # default to 1
+  singularity: "docker://scrnaseqbenchmark/cross_validation:latest"
   shell:
     "Rscript Scripts/Cross_Validation.R "
     "{input} "
@@ -61,7 +61,6 @@ rule kNN:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_kNN.py "
-    "{input.input_dir} "
     "{wildcards.output_dir}/kNN "
     "{input.datafile} "
     "{input.labfile} "
@@ -82,7 +81,6 @@ rule LDA:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_LDA.py "
-    "{input.input_dir} "
     "{wildcards.output_dir}/LDA "
     "{input.datafile} "
     "{input.labfile} "
@@ -103,7 +101,6 @@ rule NMC:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_NMC.py "
-    "{input.input_dir} "
     "{wildcards.output_dir}/NMC "
     "{input.datafile} "
     "{input.labfile} "
@@ -124,7 +121,6 @@ rule RF:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_RF.py "
-    "{input.input_dir} "
     "{wildcards.output_dir}/RF "
     "{input.datafile} "
     "{input.labfile} "
@@ -145,7 +141,6 @@ rule SVM:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_SVM.py "
-    "{input.input_dir} "
     "{wildcards.output_dir}/SVM "
     "{input.datafile} "
     "{input.labfile} "

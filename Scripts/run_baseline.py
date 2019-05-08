@@ -9,6 +9,8 @@ import os
 import numpy as np
 import pandas as pd
 import time as tm
+from pathlib import Path
+
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
@@ -17,21 +19,18 @@ from sklearn.neighbors import KNeighborsClassifier
 import rpy2.robjects as robjects
 
 
-def run_baseline(input_dir, output_dir, datafile, labfile, Rfile,
+def run_baseline(output_dir, datafile, labfile, Rfile,
         classifiers):
     '''
     Run baseline classifiers: NMC, LDA, kNN, SVM, RF
 
 	Parameters
 	----------
-	input_dir : directory of the input files
 	output_dir : directory of the output files
 	datafile : name of the data file
     labfile : name of the label file
     Rfile : file to read the cross validation indices from
     '''
-
-    os.chdir(input_dir)
 
     # read the Rdata file
     robjects.r['load'](Rfile)
@@ -51,9 +50,6 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile,
     labels = labels.iloc[tokeep]
     data = data.iloc[tokeep]
 
-    # folder with results
-    os.chdir(output_dir)
-
     # normalize data
     data = np.log1p(data)
 
@@ -64,7 +60,6 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile,
     Classifiers = {k: Classifiers[k] for k in classifiers}
 
     for c in Classifiers:
-
         tr_time=[]
         ts_time=[]
         truelab = []
@@ -104,12 +99,14 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile,
         truelab = pd.DataFrame(truelab)
         pred = pd.DataFrame(pred)
 
-        #FIXME why is `str(col)` added to the paths here?
-        truelab.to_csv(c +  "_true.csv", index = False, header = False)
-        pred.to_csv(c + "_pred.csv", index = False, header = False)
+        output_dir = Path(output_dir)
+        truelab.to_csv(str(output_dir / Path(f"{c}_true.csv")),
+                       index = False, header = False)
+        pred.to_csv(str(output_dir / Path(f"{c}_pred.csv")),
+                    index = False, header = False)
 
-        with open(c + "_training_time.csv", 'w') as f:
+        with (output_dir / Path(f"{c}_training_time.csv")).open(mode="w") as f:
             f.write("%f\n" % mean_tr)
 
-        with open(c + "_test_time.csv", 'w') as f:
+        with (output_dir / Path(f"{c}_test_time.csv")).open(mode="w") as f:
             f.write("%f\n" % mean_ts)
