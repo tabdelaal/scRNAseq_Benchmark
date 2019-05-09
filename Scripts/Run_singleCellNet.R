@@ -2,6 +2,7 @@ args <- commandArgs(TRUE)
 
 Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath, output_dir){
   Data <- read.csv(DataPath,row.names = 1)
+  colnames(Data) <- gsub('_','.',colnames(Data), fixed = TRUE)
   Labels <- as.matrix(read.csv(LabelsPath))
   load(CV_RDataPath)
   Labels <- as.vector(Labels[,col_Index])

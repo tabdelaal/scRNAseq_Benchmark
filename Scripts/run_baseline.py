@@ -26,6 +26,7 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
 
 	Parameters
 	----------
+	input_dir : directory of the input files
 	output_dir : directory of the output files
 	datafile : name of the data file
     labfile : name of the label file
@@ -57,9 +58,9 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
                    'LDA': LinearDiscriminantAnalysis,
                    'kNN': KNeighborsClassifier,
                    'SVM': LinearSVC, 'RF': RandomForestClassifier}
-    Classifiers = {k: Classifiers[k] for k in classifiers}
-
+    
     for c in Classifiers:
+        
         tr_time=[]
         ts_time=[]
         truelab = []
@@ -92,23 +93,21 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
 
             truelab.extend(y_test.values)
             pred.extend(predicted)
-
-        mean_tr = np.mean(tr_time)
-        mean_ts = np.mean(ts_time)
-
+                
         truelab = pd.DataFrame(truelab)
         pred = pd.DataFrame(pred)
+        
+        tr_time = pd.DataFrame(tr_time)
+        ts_time = pd.DataFrame(ts_time)
 
         output_dir = Path(output_dir)
         truelab.to_csv(str(output_dir / Path("{}_true.csv".format(c))),
-                       index = False, header = False)
+                       index = False)
         pred.to_csv(str(output_dir / Path("{}_pred.csv".format(c))),
-                    index = False, header = False)
-
-        with (output_dir /
-              Path("{}_training_time.csv".format(c))).open(mode="w") as f:
-            f.write("%f\n" % mean_tr)
-
-        with (output_dir /
-              Path("{}_test_time.csv".format(c))).open(mode="w") as f:
-            f.write("%f\n" % mean_ts)
+                    index = False)
+        
+        tr_time.to_csv(str(output_dir / Path("{}_training_time.csv".format(c))),
+                       index = False)
+        ts_time.to_csv(str(output_dir / Path("{}_test_time.csv".format(c))),
+                       index = False)
+    
