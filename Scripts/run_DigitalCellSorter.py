@@ -12,7 +12,7 @@ import os
 import time as tm
 import rpy2.robjects as robjects
 
-def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile):
+def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile, numfeat = 0, featfile = ''):
     '''
     Run DigitalCellSorter
     
@@ -28,6 +28,8 @@ def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile):
 	datafile : name of the data file
     labfile : name of the label file
     Rfile : file to read the cross validation indices from
+    numfeat : number of features to select, default = 0, which means that all features are used
+    featfile : file with sorted features to read
     '''
     
     os.chdir(input_dir)
@@ -40,8 +42,14 @@ def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile):
     # read the data
     data = pd.read_csv(datafile,index_col=0,sep=',')
     data = data.iloc[tokeep]
-    data = data.transpose()
 
+    # read the feature file
+    if (numfeat > 0):
+        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
+        feat_to_use = features.iloc[0:numfeat,0]
+        data = data.iloc[:,feat_to_use]
+        
+    data = data.transpose()
     
     # number of different cell types in the data?
     n_clusters = 8
@@ -79,11 +87,21 @@ def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile):
     
     for i in range(len(results)):
     	prediction[np.where(pred == i)] = results.values[i]
-
-    prediction = pd.DataFrame(prediction)
-    prediction.to_csv('DigitalCellSorter_pred.csv', index = None)
     
-    with open("DigitallCellSorter_time.csv", 'w') as f:
-        f.write("%f\n" % runtime)
+    prediction = pd.DataFrame(prediction)
+        
+    if (numfeat == 0):
+        prediction.to_csv('DigitalCellSorter_pred.csv', index = None)
+        
+        with open("DigitallCellSorter_time.csv", 'w') as f:
+            f.write("%f\n" % runtime)
+    
+    else:
+        prediction.to_csv('DigitalCellSorter_' + str(numfeat) + "_pred_" + featfile, index = None)
+        
+        with open("DigitallCellSorter_" + str(numfeat) + "_time_" + featfile, 'w') as f:
+            f.write("%f\n" % runtime)
+
+            
 
         

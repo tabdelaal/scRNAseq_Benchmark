@@ -20,7 +20,7 @@ from numpy import genfromtxt as gft
 import rpy2.robjects as robjects
 
 
-def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile):
+def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile,numfeat=0,featfile=''):
     '''
     Run CellBlast
 	
@@ -31,6 +31,8 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile):
 	datafile : name of the data file
     labfile : name of the label file
     Rfile : file to read the cross validation indices from
+    numfeat : number of features to select, default = 0, which means that all features are used
+    featfile : file with sorted features to read
     '''
     
     os.chdir(input_dir)
@@ -44,6 +46,10 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile):
     col = col - 1 
     test_ind = np.array(robjects.r['Test_Idx'])
     train_ind = np.array(robjects.r['Train_Idx'])
+    
+    # read the feature file
+    if (numfeat > 0):
+        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
 
     # read the data and labels
     os.chdir(input_dir)
@@ -71,6 +77,12 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile):
         y_train = labels[train_ind_i]
         y_test = labels[test_ind_i]
         
+        if (numfeat > 0):
+            feat_to_use = features.iloc[0:numfeat,i]
+            train = train.iloc[:,feat_to_use]
+            test = test.iloc[:,feat_to_use]
+
+        
         train.obs['cell_type'] = y_train
                 
         start = tm.time()
@@ -81,7 +93,7 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile):
         models = []
     
         for j in range(4):
-            models.append(cb.directi.fit_DIRECTi(train, latent_dim = 10, cat_dim=20, epoch=num_epoch, patience=10, random_seed = j, path="%d" % j))
+            models.append(cb.directi.fit_DIRECTi(train, epoch=num_epoch, patience=10, random_seed = j, path="%d" % j))
     
         # train model
         blast = cb.blast.BLAST(models, train).build_empirical()
@@ -104,10 +116,15 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile):
     tr_time = pd.DataFrame(tr_time)
     ts_time = pd.DataFrame(ts_time)
     
-    truelab.to_csv("Cell_BLAST_" + str(col) +"_true.csv", index = False)
-    pred.to_csv("Cell_BLAST_" + str(col) +"_pred.csv", index = False)
-    
-    tr_time.to_csv("Cell_BLAST_" + str(col) +"_training_time.csv", index = False)
-    ts_time.to_csv("Cell_BLAST_" + str(col) +"_test_time.csv", index = False)
+    if (numfeat == 0):
+        truelab.to_csv("Cell_BLAST_" + str(col) +"_true.csv", index = False)
+        pred.to_csv("Cell_BLAST_" + str(col) +"_pred.csv", index = False)
+        tr_time.to_csv("Cell_BLAST_" + str(col) +"_training_time.csv", index = False)
+        ts_time.to_csv("Cell_BLAST_" + str(col) +"_test_time.csv", index = False)
+    else:
+        truelab.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_true_" + featfile, index = False)
+        pred.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_pred_" + featfile, index = False)
+        tr_time.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_training_time_" + featfile, index = False)
+        ts_time.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_test_time_" + featfile, index = False)
 
         

@@ -1,4 +1,4 @@
-run_Garnett <- function(input_dir, output_dir, datafile, classifier, genefile){
+run_Garnett <- function(input_dir, output_dir, datafile, classifier, genefile, human){
   "
   Run Garnett
 
@@ -11,10 +11,16 @@ run_Garnett <- function(input_dir, output_dir, datafile, classifier, genefile){
   datafile : name of the data file
   classifier : name of the file containing the pretrained classifier
   genefile : name of the file containing the genes
+  human : boolean to indicate the species (FALSE means mouse)
   " 
   # load needed libraries
   library(garnett)
-  library(org.Hs.eg.db)
+  
+  if (human) {
+    library(org.Hs.eg.db)
+  } else {
+    library(org.Mm.eg.db)
+  }
   
   # load data, genes, and marker file
   setwd(input_dir)
@@ -43,7 +49,12 @@ run_Garnett <- function(input_dir, output_dir, datafile, classifier, genefile){
   start_time <- Sys.time()
   
   pbmc_cds <- estimateSizeFactors(pbmc_cds)
-  pbmc_cds <- classify_cells(pbmc_cds, hsPBMC, db = org.Hs.eg.db, cluster_extend = TRUE, cds_gene_id_type = "SYMBOL")
+  
+  if (human){
+    pbmc_cds <- classify_cells(pbmc_cds, hsPBMC, db = org.Hs.eg.db, cluster_extend = TRUE, cds_gene_id_type = "SYMBOL")
+  } else {
+    pbmc_cds <- classify_cells(pbmc_cds, mmLung, db = org.Mm.eg.db, cluster_extend = TRUE, cds_gene_id_type = "SYMBOL")
+  }
   
   end_time <- Sys.time()
   
