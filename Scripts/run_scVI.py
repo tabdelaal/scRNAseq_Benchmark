@@ -14,7 +14,7 @@ from scvi.inference import SemiSupervisedTrainer
 import time as tm
 import rpy2.robjects as robjects
 
-def run_scVI(input_dir, output_dir, datafile, labfile, Rfile):
+def run_scVI(input_dir, output_dir, datafile, labfile, Rfile, numfeat = 0, featfile = ''):
     '''
     Run scVI
 	
@@ -25,6 +25,8 @@ def run_scVI(input_dir, output_dir, datafile, labfile, Rfile):
 	datafile : name of the data file
     labfile : name of the label file
     Rfile : file to read the cross validation indices from
+    numfeat : number of features to select, default = 0, which means that all features are used
+    featfile : file with sorted features to read
     '''
     os.chdir(input_dir)
     
@@ -44,17 +46,22 @@ def run_scVI(input_dir, output_dir, datafile, labfile, Rfile):
     labels = pd.read_csv(labfile, header=0,index_col=None, sep=',', usecols = col)
 
     labels = labels.iloc[tokeep]
-    data = data.iloc[tokeep]    
+    data = data.iloc[tokeep] 
     
-    #save labels as csv file with header and index column
-    labels.to_csv('Labels_scvi.csv')
-    data.to_csv('Data_scvi.csv')    
+    # read the feature file
+    if (numfeat > 0):
+        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
     
-    train = CsvDataset('Data_scvi.csv', save_path = input_dir, sep = ",", labels_file = "Labels_scvi.csv", gene_by_cell = False)
-    
-    ## this semisupervised trainer automatically uses a part of the input data for training and a part for testing
-    scanvi = SCANVI(train.nb_genes, train.n_batches, train.n_labels)
-    trainer_scanvi = SemiSupervisedTrainer(scanvi, train, frequency=5)
+    if (numfeat == 0):
+        #save labels as csv file with header and index column
+        labels.to_csv('Labels_scvi.csv')
+        data.to_csv('Data_scvi.csv')    
+        
+        train = CsvDataset('Data_scvi.csv', save_path = input_dir, sep = ",", labels_file = "Labels_scvi.csv", gene_by_cell = False)
+        
+        ## this semisupervised trainer automatically uses a part of the input data for training and a part for testing
+        scanvi = SCANVI(train.nb_genes, train.n_batches, train.n_labels)
+        trainer_scanvi = SemiSupervisedTrainer(scanvi, train, frequency=5)
     
     n_epochs = 200
     
@@ -66,6 +73,19 @@ def run_scVI(input_dir, output_dir, datafile, labfile, Rfile):
     for i in range(np.squeeze(nfolds)):
         test_ind_i = np.array(test_ind[i], dtype = 'int') - 1
         train_ind_i = np.array(train_ind[i], dtype = 'int') - 1
+        
+        if (numfeat > 0):
+            feat_to_use = features.iloc[0:numfeat,i]
+            data2 = data.iloc[:,feat_to_use]
+            
+            labels.to_csv('Labels_scvi.csv')
+            data2.to_csv('Data_scvi.csv')    
+            
+            train = CsvDataset('Data_scvi.csv', save_path = input_dir, sep = ",", labels_file = "Labels_scvi.csv", gene_by_cell = False, new_n_genes = None)
+            
+            ## this semisupervised trainer automatically uses a part of the input data for training and a part for testing
+            scanvi = SCANVI(train.nb_genes, train.n_batches, train.n_labels)
+            trainer_scanvi = SemiSupervisedTrainer(scanvi, train, frequency=5)
 
         trainer_scanvi.labelled_set = trainer_scanvi.create_posterior(indices=(train_ind_i).ravel(), shuffle = False)
         trainer_scanvi.labelled_set.to_monitor = ['ll','accuracy']
@@ -96,10 +116,10 @@ def run_scVI(input_dir, output_dir, datafile, labfile, Rfile):
     ts_time = pd.DataFrame(ts_time)
 
     
-    truelab.to_csv("scVI_" + str(col) +"_true.csv", index = False)
-    pred.to_csv("scVI_" + str(col) +"_pred.csv", index = False)
+    truelab.to_csv("scVI_" + str(col) + "_" + str(numfeat) + "_true_" + featfile, index = False)
+    pred.to_csv("scVI_" + str(col) + "_" + str(numfeat) + "_pred_" + featfile, index = False)
     
-    tr_time.to_csv("scVI_" + str(col) +"_training_time.csv", index = False)
-    ts_time.to_csv("scVI_" + str(col) +"_test_time.csv", index = False)
+    tr_time.to_csv("scVI_" + str(col) + "_" + str(numfeat) + "_training_time_" + featfile, index = False)
+    ts_time.to_csv("scVI_" + str(col) + "_" + str(numfeat) + "_testing_time_" + featfile, index = False)
 
 

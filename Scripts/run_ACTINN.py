@@ -11,7 +11,7 @@ import pandas as pd
 import time as tm
 import rpy2.robjects as robjects
 
-def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile):
+def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile, numfeat = 0, featfile = ''):
     '''
     Run scVI
 	
@@ -22,6 +22,8 @@ def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile):
 	datafile : name of the data file
     labfile : name of the label file
     Rfile : file to read the cross validation indices from
+    numfeat : number of features to select, default = 0, which means that all features are used
+    featfile : file with sorted features to read
     '''
 
     os.chdir(input_dir)
@@ -43,6 +45,10 @@ def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile):
     labels = labels.iloc[tokeep]
     data = data.iloc[tokeep]
     
+    # read the feature file
+    if (numfeat > 0):
+        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
+    
     # folder with results
     os.chdir(output_dir)
     
@@ -58,6 +64,11 @@ def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile):
         test=data.iloc[test_ind_i]
         y_train=labels.iloc[train_ind_i]
         y_test=labels.iloc[test_ind_i]
+        
+        if (numfeat > 0):
+            feat_to_use = features.iloc[0:numfeat,i]
+            train = train.iloc[:,feat_to_use]
+            test = test.iloc[:,feat_to_use]
         
         train = train.transpose()
         test = test.transpose()
@@ -83,6 +94,18 @@ def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile):
     pred = pd.DataFrame(pred)
     tot_time = pd.DataFrame(tot)
     
-    truelab.to_csv("ACTINN_" + str(col) +"_true.csv", index = False)
-    pred.to_csv("ACTINN_" + str(col) +"_pred.csv", index = False)
-    tot_time.to_csv("ACTINN_" + str(col) +"_time.csv", index = False)
+    if (numfeat == 0):  
+        truelab.to_csv("ACTINN_" + str(col) +"_true.csv", index = False)
+        pred.to_csv("ACTINN_" + str(col) +"_pred.csv", index = False)
+        tot_time.to_csv("ACTINN_" + str(col) +"_time.csv", index = False)
+    else:
+        truelab.to_csv("ACTINN_" + str(col) + "_" + str(numfeat) + "_true_" + featfile, index = False)
+        pred.to_csv("ACTINN_" + str(col) + "_" + str(numfeat) + "_pred_" + featfile, index = False)
+        tot_time.to_csv("ACTINN_" + str(col)+ "_" + str(numfeat) + "_time_" + featfile, index = False)
+        
+        
+        
+        
+        
+        
+        

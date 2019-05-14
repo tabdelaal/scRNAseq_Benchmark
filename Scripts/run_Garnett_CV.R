@@ -1,4 +1,4 @@
-run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfile, genefile, CVFile){
+run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfile, genefile, CVFile, human){
   "
   Run Garnett
   
@@ -13,12 +13,17 @@ run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfil
   markerfile : name of the marker file
   genefile : name of the file containing the genes
   CVfile : name of the file containing cross validation indices
+  human : boolean to indicate the species (FALSE means mouse)
   " 
   setwd(input_dir)
   
   # load needed libraries
   library(garnett)
-  library(org.Hs.eg.db)
+  if (human) {
+    library(org.Hs.eg.db)
+  } else {
+    library(org.Mm.eg.db)
+  }
   
   # load the CVFile
   load(CVFile)
@@ -77,22 +82,42 @@ run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfil
     
     # training
     start_train <- Sys.time()
-    pbmc_classifier <- train_cell_classifier(cds = pbmc_cds_train, 
-                                             marker_file = markerfile,
-                                             db=org.Hs.eg.db,
-                                             cds_gene_id_type = "SYMBOL",
-                                             num_unknown = 50,
-                                             marker_file_gene_id_type = "SYMBOL")
+    
+    if (human){
+      pbmc_classifier <- train_cell_classifier(cds = pbmc_cds_train, 
+                                               marker_file = markerfile,
+                                               db=org.Hs.eg.db,
+                                               cds_gene_id_type = "SYMBOL",
+                                               num_unknown = 50,
+                                               marker_file_gene_id_type = "SYMBOL")
+    } else {
+      pbmc_classifier <- train_cell_classifier(cds = pbmc_cds_train, 
+                                               marker_file = markerfile,
+                                               db=org.Mm.eg.db,
+                                               cds_gene_id_type = "SYMBOL",
+                                               num_unknown = 50,
+                                               marker_file_gene_id_type = "SYMBOL")
+      
+    }
     end_train <- Sys.time()
     train_time[i] <- as.numeric(end_train - start_train)
     
     # testing
     start_test <- Sys.time()
-    pbmc_cds_test <- classify_cells(pbmc_cds_test, 
-                                    pbmc_classifier, 
-                                    db = org.Hs.eg.db, 
-                                    cluster_extend = TRUE,
-                                    cds_gene_id_type = "SYMBOL")
+    
+    if (human) {
+      pbmc_cds_test <- classify_cells(pbmc_cds_test, 
+                                      pbmc_classifier, 
+                                      db = org.Hs.eg.db, 
+                                      cluster_extend = TRUE,
+                                      cds_gene_id_type = "SYMBOL")
+    } else {
+      pbmc_cds_test <- classify_cells(pbmc_cds_test, 
+                                      pbmc_classifier, 
+                                      db = org.Mm.eg.db, 
+                                      cluster_extend = TRUE,
+                                      cds_gene_id_type = "SYMBOL")
+    }
     end_test <- Sys.time()
     test_time[i] <- as.numeric(end_test - start_test)
     

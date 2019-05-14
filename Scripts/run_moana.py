@@ -13,7 +13,7 @@ from moana.classify import CellTypeClassifier
 import time as tm
 import rpy2.robjects as robjects
 
-def run_moana(input_dir,output_dir,datafile,labfile,Rfile):
+def run_moana(input_dir,output_dir,datafile,labfile,Rfile,numfeat = 0, featfile = ''):
     '''
     Run moana
     
@@ -27,6 +27,8 @@ def run_moana(input_dir,output_dir,datafile,labfile,Rfile):
 	datafile : name of the data file
     labfile : name of the label file
     Rfile : file to read the cross validation indices from
+    numfeat : number of features to select, default = 0, which means that all features are used
+    featfile : file with sorted features to read
     '''
     
     os.chdir(input_dir)
@@ -37,8 +39,14 @@ def run_moana(input_dir,output_dir,datafile,labfile,Rfile):
     tokeep = np.array(robjects.r['Cells_to_Keep'], dtype = 'bool')
     
     matrix = ExpMatrix.read_tsv(datafile, sep = ',')    
-    matrix = matrix.iloc[tokeep]    
+    matrix = matrix.iloc[tokeep]  
     
+    # read the feature file
+    if (numfeat > 0):
+        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
+        feat_to_use = features.iloc[0:numfeat,0]
+        matrix = matrix.iloc[:,feat_to_use]
+
     data = ExpMatrix(X = np.transpose(matrix.X), genes = matrix.cells, cells = matrix.genes)
     data.genes.name = 'Genes'
     data.cells.name = 'Cells'
@@ -57,10 +65,17 @@ def run_moana(input_dir,output_dir,datafile,labfile,Rfile):
     
     os.chdir(output_dir)
     
-    pred.to_csv("Moana_pred.csv", index = False)
+    if (numfeat == 0):
+        pred.to_csv("Moana_pred.csv", index = False)
+        
+        with open("Moana_time.csv", 'w') as f:
+            f.write("%f\n" % runtime)
     
-    with open("Moana_time.csv", 'w') as f:
-        f.write("%f\n" % runtime)
+    else:
+        pred.to_csv("Moana_" + str(numfeat) + "_pred_" + featfile, index = False)
+        
+        with open("Moana_" + str(numfeat) + "_time_" + featfile, 'w') as f:
+            f.write("%f\n" % runtime)
 
         
     
