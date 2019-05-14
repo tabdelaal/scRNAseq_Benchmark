@@ -58,9 +58,10 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
                    'LDA': LinearDiscriminantAnalysis,
                    'kNN': KNeighborsClassifier,
                    'SVM': LinearSVC, 'RF': RandomForestClassifier}
-    
+    Classifiers = {k: Classifiers[k] for k in classifiers}
+
     for c in Classifiers:
-        
+
         tr_time=[]
         ts_time=[]
         truelab = []
@@ -93,10 +94,10 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
 
             truelab.extend(y_test.values)
             pred.extend(predicted)
-                
+
         truelab = pd.DataFrame(truelab)
         pred = pd.DataFrame(pred)
-        
+
         tr_time = pd.DataFrame(tr_time)
         ts_time = pd.DataFrame(ts_time)
 
@@ -105,9 +106,8 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
                        index = False)
         pred.to_csv(str(output_dir / Path("{}_pred.csv".format(c))),
                     index = False)
-        
+
         tr_time.to_csv(str(output_dir / Path("{}_training_time.csv".format(c))),
                        index = False)
         ts_time.to_csv(str(output_dir / Path("{}_test_time.csv".format(c))),
                        index = False)
-    

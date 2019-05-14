@@ -42,6 +42,24 @@ rule singleCellNet:
     "{input.folds} "
     "{wildcards.output_dir}/singleCellNet &> {log}"
 
+rule CHETAH:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+  output:
+    pred = "{output_dir}/CHETAH/CHETAH_pred.csv",
+    true = "{output_dir}/CHETAH/CHETAH_true.csv",
+    total_time = "{output_dir}/CHETAH/CHETAH_total_time.csv"
+  log: "{output_dir}/CHETAH/CHETAH.log"
+  singularity: "docker://scrnaseqbenchmark/chetah:latest"
+  shell:
+    "Rscript Scripts/Run_CHETAH.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/CHETAH &> {log}"
+
 
 """
 Rules for python based tools.

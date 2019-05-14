@@ -1,10 +1,6 @@
 # scRNAseq_Benchmark
 Benchmarking classification tools for scRNA-seq data
 
-## To Add
-1. List of used R and Python tools
-2. Link to filtered datasets used
-
 ## How to use
 [snakemake](https://snakemake.readthedocs.io/en/stable/index.html) and
 [singularity](https://www.sylabs.io/docs/) need to be available on your system.
@@ -47,6 +43,48 @@ tools_to_run: # List of tools to run
 - RF
 - SVM
 - [singleCellNet](https://github.com/pcahan1/singleCellNet)
+- [CHETAH](https://github.com/jdekanter/CHETAH)
 
 ## Adding new tools
-TBD
+In order to add a tool to this benchmarking workflow, a rule for this tool
+needs to be added to the `Snakefile`. This rule should produce as output:
+- a table of predicted label (`<output directory/<tool>/<tool>_pred.csv`).
+- a table of true labels (`<output directory/<tool>/<tool>_true.csv`).
+- a tables of testing, prediction and/or total time:
+  - `<output directory>/<tool>/<tool>_test_time.csv`
+  - `<output directory>/<tool>/<tool>_training_time.csv`
+  - `<output directory>/<tool>/<tool>_total_time.csv`
+
+The input to this rule should be:
+- a count table (specified as the `datafile` in the config).
+- a true labels file (specified as the `labfile` in the config).
+
+You will likely want to write a wrapper script for the tool you want to
+add to facilitate this. The `"{output_dir}/CV_folds.RData"` input may be
+used to provide your wrapper script with premade folds for cross_validation.
+It is recommended to make a docker image containing all dependencies for both
+the tool and any wrappers for the tool.
+
+The following can be used as a template for new rules. Replace everything
+surrounded by (and including the) `<>` with appropriate values.
+```
+rule <tool name>:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData"
+  output:
+    pred = "{output_dir}/<tool name>/<tool name>_pred.csv",
+    true = "{output_dir}/<tool name>/<tool name>_true.csv",
+    test_time = "{output_dir}/<tool name>/<tool name>_test_time.csv",
+    training_time = "{output_dir}/<tool name>/<tool name>_training_time.csv",
+    total_time = "{output_dir}/<tool name>/<tool name>_total_time.csv"
+  log: "{output_dir}/<tool name>/<tool name>.log"
+  singularity: "docker://<docker image>"
+  shell:
+    "<python or Rscript> <wrapper script> "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/<tool name> &> {log}"
+```
