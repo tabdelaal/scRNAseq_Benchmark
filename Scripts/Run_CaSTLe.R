@@ -1,10 +1,13 @@
-Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath){
+Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath, GeneOrderPath = NULL, num_of_genes = NULL){
   Data <- read.csv(DataPath,row.names = 1)
   Labels <- as.matrix(read.csv(LabelsPath))
   load(CV_RDataPath)
   Labels <- as.vector(Labels[,col_Index])
   Data <- Data[Cells_to_Keep,]
   Labels <- Labels[Cells_to_Keep]
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    GenesOrder = read.csv(GeneOrderPath)
+  }
   
   #############################################################################
   #                                CaSTLe                                     #
@@ -21,8 +24,15 @@ Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath){
   
   for(i in c(1:n_folds)){
     # 1. Load datasets
-    ds1 = Data[Train_Idx[[i]],]
-    ds2 = Data[Test_Idx[[i]],]
+    if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+      ds1 = Data[Train_Idx[[i]],as.vector(GenesOrder[c(1:num_of_genes),i])+1]
+      ds2 = Data[Test_Idx[[i]],as.vector(GenesOrder[c(1:num_of_genes),i])+1]
+    }
+    else{
+      ds1 = Data[Train_Idx[[i]],]
+      ds2 = Data[Test_Idx[[i]],]
+    }
+    
     sourceCellTypes = as.factor(Labels[Train_Idx[[i]]])
     targetCellTypes = as.factor(Labels[Test_Idx[[i]]])
     
@@ -99,8 +109,17 @@ Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath){
   Pred_Labels_Castle <- as.vector(unlist(Pred_Labels_Castle))
   Training_Time_Castle <- as.vector(unlist(Training_Time_Castle))
   Testing_Time_Castle <- as.vector(unlist(Testing_Time_Castle))
-  write.csv(True_Labels_Castle,'True_Labels_CaSTLe.csv',row.names = FALSE)
-  write.csv(Pred_Labels_Castle,'Pred_Labels_CaSTLe.csv',row.names = FALSE)
-  write.csv(Training_Time_Castle,'Training_Time_CaSTLe.csv',row.names = FALSE)
-  write.csv(Testing_Time_Castle,'Testing_Time_CaSTLe.csv',row.names = FALSE)
+  
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    write.csv(True_Labels_Castle,paste('True_Labels_Castle_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Pred_Labels_Castle,paste('Pred_Labels_Castle_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Training_Time_Castle,paste('Training_Time_Castle_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Testing_Time_Castle,paste('Testing_Time_Castle_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+  }
+  else{
+    write.csv(True_Labels_Castle,'True_Labels_CaSTLe.csv',row.names = FALSE)
+    write.csv(Pred_Labels_Castle,'Pred_Labels_CaSTLe.csv',row.names = FALSE)
+    write.csv(Training_Time_Castle,'Training_Time_CaSTLe.csv',row.names = FALSE)
+    write.csv(Testing_Time_Castle,'Testing_Time_CaSTLe.csv',row.names = FALSE)
+  }
 }
