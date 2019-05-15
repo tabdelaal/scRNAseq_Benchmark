@@ -1,4 +1,4 @@
-Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath){
+Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath, GeneOrderPath = NULL, num_of_genes = NULL){
   Data <- read.csv(DataPath,row.names = 1)
   colnames(Data) <- gsub('_','.',colnames(Data), fixed = TRUE)
   Labels <- as.matrix(read.csv(LabelsPath))
@@ -6,6 +6,9 @@ Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath){
   Labels <- as.vector(Labels[,col_Index])
   Data <- Data[Cells_to_Keep,]
   Labels <- Labels[Cells_to_Keep]
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    GenesOrder = read.csv(GeneOrderPath)
+  }
   
   #############################################################################
   #                              singleCellNet                                #
@@ -19,8 +22,14 @@ Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath){
   Data = t(as.matrix(Data))              # deals also with sparse matrix
   
   for(i in c(1:n_folds)){
-    DataTrain <- Data[,Train_Idx[[i]]]
-    DataTest <- Data[,Test_Idx[[i]]]
+    if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+      DataTrain <- Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Train_Idx[[i]]]
+      DataTest <- Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Test_Idx[[i]]]
+    }
+    else{
+      DataTrain <- Data[,Train_Idx[[i]]]
+      DataTest <- Data[,Test_Idx[[i]]]
+    }
     
     start_time <- Sys.time()
     cgenes2<-findClassyGenes(DataTrain, data.frame(Annotation = Labels[Train_Idx[[i]]]), "Annotation")
@@ -46,8 +55,16 @@ Run_singleCellNet<-function(DataPath,LabelsPath,CV_RDataPath){
   Pred_Labels_singleCellNet <- as.vector(unlist(Pred_Labels_singleCellNet))
   Training_Time_singleCellNet <- as.vector(unlist(Training_Time_singleCellNet))
   Testing_Time_singleCellNet <- as.vector(unlist(Testing_Time_singleCellNet))
-  write.csv(True_Labels_singleCellNet,'True_Labels_singleCellNet.csv',row.names = FALSE)
-  write.csv(Pred_Labels_singleCellNet,'Pred_Labels_singleCellNet.csv',row.names = FALSE)
-  write.csv(Training_Time_singleCellNet,'Training_Time_singleCellNet.csv',row.names = FALSE)
-  write.csv(Testing_Time_singleCellNet,'Testing_Time_singleCellNet.csv',row.names = FALSE)
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    write.csv(True_Labels_singleCellNet,paste('True_Labels_singleCellNet_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Pred_Labels_singleCellNet,paste('Pred_Labels_singleCellNet_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Training_Time_singleCellNet,paste('Training_Time_singleCellNet_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Testing_Time_singleCellNet,paste('Testing_Time_singleCellNet_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+  }
+  else{
+    write.csv(True_Labels_singleCellNet,'True_Labels_singleCellNet.csv',row.names = FALSE)
+    write.csv(Pred_Labels_singleCellNet,'Pred_Labels_singleCellNet.csv',row.names = FALSE)
+    write.csv(Training_Time_singleCellNet,'Training_Time_singleCellNet.csv',row.names = FALSE)
+    write.csv(Testing_Time_singleCellNet,'Testing_Time_singleCellNet.csv',row.names = FALSE)
+  }
 }
