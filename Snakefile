@@ -1,13 +1,23 @@
 #TODO replace all 'latest' tags with actual verions
 
-rule all:
+"""
+Rule for making the final report.
+"""  #TODO
+rule make_final_report:
   input:
+    tool_outputs = expand("{output_dir}/{tool}/{tool}_true.csv",
+        tool=config["tools_to_run"], output_dir=config["output_dir"])
+  params:
+    output_dir = config["output_dir"]
+  output:
     "{}/final_report".format(config["output_dir"])
+  shell:
+    "touch {params.output_dir}/final_report"
 
 """
 Rule for creating cross validation folds
 """
-rule folds:
+rule generate_CV_folds:
   input: config["labfile"],
   output: "{output_dir}/CV_folds.RData"
   log: "{output_dir}/CV_folds.log"
@@ -60,6 +70,23 @@ rule CHETAH:
     "{input.folds} "
     "{wildcards.output_dir}/CHETAH &> {log}"
 
+rule SingleR:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+  output:
+    pred = "{output_dir}/SingleR/SingleR_pred.csv",
+    true = "{output_dir}/SingleR/SingleR_true.csv",
+    total_time = "{output_dir}/SingleR/SingleR_total_time.csv"
+  log: "{output_dir}/SingleR/SingleR.log"
+  singularity: "docker://scrnaseqbenchmark/singler:latest"
+  shell:
+    "Rscript Scripts/Run_SingleR.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/SingleR &> {log}"
 
 """
 Rules for python based tools.
@@ -158,17 +185,3 @@ rule SVM:
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} &> {log}"
-
-"""
-Rule for making the final report.
-"""  #TODO
-rule make_final_report:
-  input:
-    tool_outputs = expand("{output_dir}/{tool}/{tool}_true.csv",
-        tool=config["tools_to_run"], output_dir=config["output_dir"])
-  params:
-    output_dir = config["output_dir"]
-  output:
-    "{}/final_report".format(config["output_dir"])
-  shell:
-    "touch {params.output_dir}/final_report"
