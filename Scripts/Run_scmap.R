@@ -1,10 +1,13 @@
-Run_scmap <- function(DataPath,LabelsPath,CV_RDataPath){
+Run_scmap <- function(DataPath,LabelsPath,CV_RDataPath, GeneOrderPath = NULL, num_of_genes = NULL){
   Data <- read.csv(DataPath,row.names = 1)
   Labels <- as.matrix(read.csv(LabelsPath))
   load(CV_RDataPath)
   Labels <- as.vector(Labels[,col_Index])
   Data <- Data[Cells_to_Keep,]
   Labels <- Labels[Cells_to_Keep]
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    GenesOrder = read.csv(GeneOrderPath)
+  }
   
   #############################################################################
   #                                 scmap                                     #
@@ -22,18 +25,34 @@ Run_scmap <- function(DataPath,LabelsPath,CV_RDataPath){
   Data = t(as.matrix(Data))
   
   for (i in c(1:n_folds)){
-    sce <- SingleCellExperiment(list(normcounts = Data[,Train_Idx[[i]]]), 
-                                colData = data.frame(cell_type1 = Labels[Train_Idx[[i]]]))
-    logcounts(sce) <- log2(normcounts(sce) + 1)
-    # use gene names as feature symbols
-    rowData(sce)$feature_symbol <- rownames(sce)
-    sce <- selectFeatures(sce, suppress_plot = TRUE)
-    
-    sce_test <- SingleCellExperiment(list(normcounts = Data[,Test_Idx[[i]]]), 
-                                     colData = data.frame(cell_type1 = Labels[Test_Idx[[i]]]))
-    logcounts(sce_test) <- log2(normcounts(sce_test) + 1)
-    rowData(sce_test)$feature_symbol <- rownames(sce_test)
-    sce_test@rowRanges@elementMetadata@listData = sce@rowRanges@elementMetadata@listData
+    if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+      sce <- SingleCellExperiment(list(normcounts = Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Train_Idx[[i]]]), 
+                                  colData = data.frame(cell_type1 = Labels[Train_Idx[[i]]]))
+      logcounts(sce) <- log2(normcounts(sce) + 1)
+      # use gene names as feature symbols
+      rowData(sce)$feature_symbol <- rownames(sce)
+      sce <- selectFeatures(sce, n_features = num_of_genes, suppress_plot = TRUE)
+      
+      sce_test <- SingleCellExperiment(list(normcounts = Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Test_Idx[[i]]]), 
+                                       colData = data.frame(cell_type1 = Labels[Test_Idx[[i]]]))
+      logcounts(sce_test) <- log2(normcounts(sce_test) + 1)
+      rowData(sce_test)$feature_symbol <- rownames(sce_test)
+      sce_test@rowRanges@elementMetadata@listData = sce@rowRanges@elementMetadata@listData
+    }
+    else{
+      sce <- SingleCellExperiment(list(normcounts = Data[,Train_Idx[[i]]]), 
+                                  colData = data.frame(cell_type1 = Labels[Train_Idx[[i]]]))
+      logcounts(sce) <- log2(normcounts(sce) + 1)
+      # use gene names as feature symbols
+      rowData(sce)$feature_symbol <- rownames(sce)
+      sce <- selectFeatures(sce, suppress_plot = TRUE)
+      
+      sce_test <- SingleCellExperiment(list(normcounts = Data[,Test_Idx[[i]]]), 
+                                       colData = data.frame(cell_type1 = Labels[Test_Idx[[i]]]))
+      logcounts(sce_test) <- log2(normcounts(sce_test) + 1)
+      rowData(sce_test)$feature_symbol <- rownames(sce_test)
+      sce_test@rowRanges@elementMetadata@listData = sce@rowRanges@elementMetadata@listData
+    }
     
     # scmap-cluster
     start_time <- Sys.time()
@@ -65,6 +84,7 @@ Run_scmap <- function(DataPath,LabelsPath,CV_RDataPath){
     True_Labels_scmapcell[i] <- list(Labels[Test_Idx[[i]]])
     Pred_Labels_scmapcell[i] <- list(scmapCell_clusters$combined_labs)
   }
+  
   True_Labels_scmapcluster <- as.vector(unlist(True_Labels_scmapcluster))
   Pred_Labels_scmapcluster <- as.vector(unlist(Pred_Labels_scmapcluster))
   True_Labels_scmapcell <- as.vector(unlist(True_Labels_scmapcell))
@@ -73,12 +93,25 @@ Run_scmap <- function(DataPath,LabelsPath,CV_RDataPath){
   Testing_Time_scmapcluster <- as.vector(unlist(Testing_Time_scmapcluster))
   Training_Time_scmapcell <- as.vector(unlist(Training_Time_scmapcell))
   Testing_Time_scmapcell <- as.vector(unlist(Testing_Time_scmapcell))
-  write.csv(True_Labels_scmapcluster,'True_Labels_scmapcluster.csv',row.names = FALSE)
-  write.csv(Pred_Labels_scmapcluster,'Pred_Labels_scmapcluster.csv',row.names = FALSE)
-  write.csv(True_Labels_scmapcell,'True_Labels_scmapcell.csv',row.names = FALSE)
-  write.csv(Pred_Labels_scmapcell,'Pred_Labels_scmapcell.csv',row.names = FALSE)
-  write.csv(Training_Time_scmapcluster,'Training_Time_scmapcluster.csv',row.names = FALSE)
-  write.csv(Testing_Time_scmapcluster,'Testing_Time_scmapcluster.csv',row.names = FALSE)
-  write.csv(Training_Time_scmapcell,'Training_Time_scmapcell.csv',row.names = FALSE)
-  write.csv(Testing_Time_scmapcell,'Testing_Time_scmapcell.csv',row.names = FALSE)
+  
+  if (!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    write.csv(True_Labels_scmapcluster,paste('True_Labels_scmapcluster_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Pred_Labels_scmapcluster,paste('Pred_Labels_scmapcluster_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(True_Labels_scmapcell,paste('True_Labels_scmapcell_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Pred_Labels_scmapcell,paste('Pred_Labels_scmapcell_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Training_Time_scmapcluster,paste('Training_Time_scmapcluster_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Testing_Time_scmapcluster,paste('Testing_Time_scmapcluster_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Training_Time_scmapcell,paste('Training_Time_scmapcell_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Testing_Time_scmapcell,paste('Testing_Time_scmapcell_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+  }
+  else{
+    write.csv(True_Labels_scmapcluster,'True_Labels_scmapcluster.csv',row.names = FALSE)
+    write.csv(Pred_Labels_scmapcluster,'Pred_Labels_scmapcluster.csv',row.names = FALSE)
+    write.csv(True_Labels_scmapcell,'True_Labels_scmapcell.csv',row.names = FALSE)
+    write.csv(Pred_Labels_scmapcell,'Pred_Labels_scmapcell.csv',row.names = FALSE)
+    write.csv(Training_Time_scmapcluster,'Training_Time_scmapcluster.csv',row.names = FALSE)
+    write.csv(Testing_Time_scmapcluster,'Testing_Time_scmapcluster.csv',row.names = FALSE)
+    write.csv(Training_Time_scmapcell,'Training_Time_scmapcell.csv',row.names = FALSE)
+    write.csv(Testing_Time_scmapcell,'Testing_Time_scmapcell.csv',row.names = FALSE)
+  }
 }

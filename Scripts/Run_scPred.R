@@ -1,10 +1,13 @@
-Run_scPred<-function(DataPath,LabelsPath,CV_RDataPath){
+Run_scPred<-function(DataPath,LabelsPath,CV_RDataPath, GeneOrderPath = NULL, num_of_genes = NULL){
   Data <- read.csv(DataPath,row.names = 1)
   Labels <- as.matrix(read.csv(LabelsPath))
   load(CV_RDataPath)
   Labels <- as.vector(Labels[,col_Index])
   Data <- Data[Cells_to_Keep,]
   Labels <- Labels[Cells_to_Keep]
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    GenesOrder = read.csv(GeneOrderPath)
+  }
   
   #############################################################################
   #                                scPred                                     #
@@ -19,17 +22,33 @@ Run_scPred<-function(DataPath,LabelsPath,CV_RDataPath){
   Data = t(as.matrix(Data))
   
   for (i in c(1:n_folds)){
-    sce <- SingleCellExperiment(list(normcounts = Data[,Train_Idx[[i]]]), 
-                                colData = data.frame(cell_type1 = Labels[Train_Idx[[i]]]))
-    sce_counts <- normcounts(sce)
-    sce_cpm <- apply(sce_counts, 2, function(x) (x/sum(x))*1000000)
-    sce_metadata <- as.data.frame(colData(sce))
+    if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+      sce <- SingleCellExperiment(list(normcounts = Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Train_Idx[[i]]]), 
+                                  colData = data.frame(cell_type1 = Labels[Train_Idx[[i]]]))
+      sce_counts <- normcounts(sce)
+      sce_cpm <- apply(sce_counts, 2, function(x) (x/sum(x))*1000000)
+      sce_metadata <- as.data.frame(colData(sce))
+      
+      sce_test <- SingleCellExperiment(list(normcounts = Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Test_Idx[[i]]]), 
+                                       colData = data.frame(cell_type1 = Labels[Test_Idx[[i]]]))
+      sce_counts_test <- normcounts(sce_test)
+      sce_cpm_test <- apply(sce_counts_test, 2, function(x) (x/sum(x))*1000000)
+      sce_metadata_test <- as.data.frame(colData(sce_test))
+    }
+    else{
+      sce <- SingleCellExperiment(list(normcounts = Data[,Train_Idx[[i]]]), 
+                                  colData = data.frame(cell_type1 = Labels[Train_Idx[[i]]]))
+      sce_counts <- normcounts(sce)
+      sce_cpm <- apply(sce_counts, 2, function(x) (x/sum(x))*1000000)
+      sce_metadata <- as.data.frame(colData(sce))
+      
+      sce_test <- SingleCellExperiment(list(normcounts = Data[,Test_Idx[[i]]]), 
+                                       colData = data.frame(cell_type1 = Labels[Test_Idx[[i]]]))
+      sce_counts_test <- normcounts(sce_test)
+      sce_cpm_test <- apply(sce_counts_test, 2, function(x) (x/sum(x))*1000000)
+      sce_metadata_test <- as.data.frame(colData(sce_test))
+    }
     
-    sce_test <- SingleCellExperiment(list(normcounts = Data[,Test_Idx[[i]]]), 
-                                     colData = data.frame(cell_type1 = Labels[Test_Idx[[i]]]))
-    sce_counts_test <- normcounts(sce_test)
-    sce_cpm_test <- apply(sce_counts_test, 2, function(x) (x/sum(x))*1000000)
-    sce_metadata_test <- as.data.frame(colData(sce_test))
     
     # scPred Training    
     start_time <- Sys.time()
@@ -56,8 +75,16 @@ Run_scPred<-function(DataPath,LabelsPath,CV_RDataPath){
   Pred_Labels_scPred <- as.vector(unlist(Pred_Labels_scPred))
   Training_Time_scPred <- as.vector(unlist(Training_Time_scPred))
   Testing_Time_scPred <- as.vector(unlist(Testing_Time_scPred))
-  write.csv(True_Labels_scPred,'True_Labels_scPred.csv',row.names = FALSE)
-  write.csv(Pred_Labels_scPred,'Pred_Labels_scPred.csv',row.names = FALSE)
-  write.csv(Training_Time_scPred,'Training_Time_scPred.csv',row.names = FALSE)
-  write.csv(Testing_Time_scPred,'Testing_Time_scPred.csv',row.names = FALSE)
+  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+    write.csv(True_Labels_scPred,paste('True_Labels_scPred_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Pred_Labels_scPred,paste('Pred_Labels_scPred_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Training_Time_scPred,paste('Training_Time_scPred_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Testing_Time_scPred,paste('Testing_Time_scPred_',num_of_genes,'.csv', sep = ''),row.names = FALSE)
+  }
+  else{
+    write.csv(True_Labels_scPred,'True_Labels_scPred.csv',row.names = FALSE)
+    write.csv(Pred_Labels_scPred,'Pred_Labels_scPred.csv',row.names = FALSE)
+    write.csv(Training_Time_scPred,'Training_Time_scPred.csv',row.names = FALSE)
+    write.csv(Testing_Time_scPred,'Testing_Time_scPred.csv',row.names = FALSE)
+  }
 }
