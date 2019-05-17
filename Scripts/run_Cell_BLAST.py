@@ -79,8 +79,8 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile,numfeat=0,featfil
         
         if (numfeat > 0):
             feat_to_use = features.iloc[0:numfeat,i]
-            train = train.iloc[:,feat_to_use]
-            test = test.iloc[:,feat_to_use]
+            train = train[:,feat_to_use]
+            test = test[:,feat_to_use]
 
         
         train.obs['cell_type'] = y_train

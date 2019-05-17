@@ -77,6 +77,8 @@ def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile, numfeat = 0, fea
         test.to_csv("test.csv")
         y_train.to_csv("train_lab.csv", header = False, index = True, sep = '\t')
         y_test.to_csv("test_lab.csv", header = False, index = True, sep = '\t')
+        
+        tm.sleep(60)
             
         os.system("python /home/nfs/lcmmichielsen/classifiers/ACTINN/actinn_format.py -i train.csv -o train -f csv")
         os.system("python /home/nfs/lcmmichielsen/classifiers/ACTINN/actinn_format.py -i test.csv -o test -f csv")
@@ -84,6 +86,8 @@ def run_ACTINN(input_dir, output_dir, datafile, labfile, Rfile, numfeat = 0, fea
         start = tm.time()
         os.system("python /home/nfs/lcmmichielsen/classifiers/ACTINN/actinn_predict.py -trs train.h5 -trl train_lab.csv -ts test.h5")    
         tot.append(tm.time()-start)
+        
+        tm.sleep(60)
 
         truelab.extend(y_test.values)
         predlabels = pd.read_csv('predicted_label.txt',header=0,index_col=None, sep='\t', usecols = [1])            

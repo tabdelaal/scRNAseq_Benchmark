@@ -36,6 +36,7 @@ def rank_gene_dropouts(datafile, input_dir, Rfile, CV = True):
     # read the data
     data = pd.read_csv(datafile,index_col=0,sep=',')
     data = data.iloc[tokeep]
+    data = np.log2(data+1)
     
     if CV:
     
@@ -47,7 +48,8 @@ def rank_gene_dropouts(datafile, input_dir, Rfile, CV = True):
             train.columns = np.arange(len(train.columns))
             
             # rank genes training set 
-            dropout = train.shape[1] - train.astype(bool).sum(axis='rows')
+            dropout = (train == 0).sum(axis='rows')
+            dropout = (dropout / train.shape[0]) * 100
             mean = train.mean(axis='rows')
             
             notzero = np.where((np.array(mean) > 0) & (np.array(dropout) > 0))[0]
@@ -62,7 +64,7 @@ def rank_gene_dropouts(datafile, input_dir, Rfile, CV = True):
             mean = mean.iloc[notzero]
     
             dropout = np.log2(np.array(dropout)).reshape(-1,1)
-            mean = np.log2(np.array(mean)).reshape(-1,1)
+            mean = np.array(mean).reshape(-1,1)
             reg = linear_model.LinearRegression()
             reg.fit(mean,dropout)
     

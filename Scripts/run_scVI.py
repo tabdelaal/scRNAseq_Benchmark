@@ -81,7 +81,7 @@ def run_scVI(input_dir, output_dir, datafile, labfile, Rfile, numfeat = 0, featf
             labels.to_csv('Labels_scvi.csv')
             data2.to_csv('Data_scvi.csv')    
             
-            train = CsvDataset('Data_scvi.csv', save_path = input_dir, sep = ",", labels_file = "Labels_scvi.csv", gene_by_cell = False, new_n_genes = None)
+            train = CsvDataset('Data_scvi.csv', save_path = input_dir, sep = ",", labels_file = "Labels_scvi.csv", gene_by_cell = False, new_n_genes = False)
             
             ## this semisupervised trainer automatically uses a part of the input data for training and a part for testing
             scanvi = SCANVI(train.nb_genes, train.n_batches, train.n_labels)
