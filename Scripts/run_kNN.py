@@ -2,6 +2,6 @@
 
 from sys import argv
 
-from run_baseline import run_baseline
+from run_baseline_all import run_baseline
 
-run_baseline(argv[1], argv[2], argv[3], argv[4], ["kNN"])
+run_baseline(argv[1], argv[2], argv[3], argv[4], ["kNN"], int(argv[5]), argv[6])

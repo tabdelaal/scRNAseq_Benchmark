@@ -16,13 +16,15 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install --no-install-recommends --yes python3 python3-pip && \
     pip3 --no-cache-dir install setuptools && \
-    pip3 --no-cache-dir install pandas rpy2 scikit-learn && \
+    pip3 --no-cache-dir install pandas rpy2 scikit-learn statsmodels && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Scripts/run_baseline.py \
+COPY Scripts/run_baseline_all.py \
      Scripts/run_kNN.py \
      Scripts/run_LDA.py \
      Scripts/run_NMC.py \
      Scripts/run_RF.py \
      Scripts/run_SVM.py \
+     Scripts/rank_gene_dropouts \
+     Scripts/ranks_gene_CoV.py \
      /Scripts/

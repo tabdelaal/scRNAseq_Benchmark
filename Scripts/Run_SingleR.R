@@ -10,7 +10,7 @@ Run_SingleR<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPat
   if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
     GenesOrder = read.csv(GeneOrderPath)
   }
-  
+
   #############################################################################
   #                               SingleR                                     #
   #############################################################################
@@ -20,12 +20,12 @@ Run_SingleR<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPat
   Pred_Labels_SingleR <- list()
   Total_Time_SingleR <- list()
   Data = t(as.matrix(Data))
-  
+
   for (i in c(1:n_folds)){
     if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
       start_time <- Sys.time()
-      singler = SingleR(method = "single", Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Test_Idx[[i]]], 
-                        Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Train_Idx[[i]]], 
+      singler = SingleR(method = "single", Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Test_Idx[[i]]],
+                        Data[as.vector(GenesOrder[c(1:num_of_genes),i])+1,Train_Idx[[i]]],
                         Labels[Train_Idx[[i]]], numCores = 1)
       end_time <- Sys.time()
     }
@@ -35,7 +35,7 @@ Run_SingleR<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPat
       end_time <- Sys.time()
     }
     Total_Time_SingleR[i] <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-    
+
     True_Labels_SingleR[i] <- list(Labels[Test_Idx[[i]]])
     Pred_Labels_SingleR[i] <- list(as.vector(singler$labels))
   }
@@ -47,4 +47,8 @@ Run_SingleR<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPat
   write.csv(Total_Time_SingleR,paste0(output_dir,'/SingleR_total_time.csv'),row.names = FALSE)
 }
 
-Run_SingleR(args[1], args[2], args[3], args[4])
+if (args[6] == "0") {
+  Run_SingleR(args[1], args[2], args[3], args[4])
+} else {
+  Run_SingleR(args[1], args[2], args[3], args[4], args[5], as.numeric(args[6]))
+}

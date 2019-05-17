@@ -26,7 +26,6 @@ def run_baseline(output_dir, datafile, labfile, Rfile,
 
 	Parameters
 	----------
-	input_dir : directory of the input files
 	output_dir : directory of the output files
 	datafile : name of the data file
     labfile : name of the label file
