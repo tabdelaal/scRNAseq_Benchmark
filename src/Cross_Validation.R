@@ -1,6 +1,19 @@
-Cross_Validation <- function(LabelsFilePath, col_Index){
+Cross_Validation <- function(LabelsPath, col_Index = 1,OutputDir){
+  "
+  Cross_Validation
+  Function returns train and test indices for 5 folds stratified across unique cell populations,
+  also filter out cell populations with less than 10 cells.
+  It return a 'CV_folds.RData' file which then used as input to classifiers wrappers.
   
-  Labels <- as.matrix(read.csv(LabelsFilePath))
+  Parameters
+  ----------
+  LabelsPath : Cell population annotations file path (.csv).
+  col_Index : column index (integer) defining which level of annotation to use,
+  in case of multiple cell type annotations (default is 1)
+  OutputDir : Output directory defining the path of the exported file.
+  "
+  
+  Labels <- as.matrix(read.csv(LabelsPath))
   Labels <- as.vector(Labels[,col_Index])
   
   Removed_classes <- !(table(Labels) > 10)
@@ -21,5 +34,6 @@ Cross_Validation <- function(LabelsFilePath, col_Index){
     Test_Idx[i] <- Folds[Test_Folds[i]]
   }
   remove(Temp_Folds,i,Folds)
+  setwd(OutputDir)
   save(n_folds,Train_Idx,Test_Idx,col_Index,Cells_to_Keep,file = 'CV_folds.RData')
 }
