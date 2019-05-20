@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 26 15:32:29 2019
-
-@author: Lieke
-"""
-
 import numpy as np
 import pandas as pd
 import scripts.DigitalCellSorter as DigitalCellSorter
@@ -12,74 +5,65 @@ import os
 import time as tm
 import rpy2.robjects as robjects
 
-def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile, numfeat = 0, featfile = ''):
+def run_DigitalCellSorter(DataPath, LabelsPath, CV_RDataPath, GeneListPath, OutputDir, GeneOrderPath = "", NumGenes = 0):
     '''
-    Run DigitalCellSorter
-    
-    NOTE: a marker genelist is needed to run DigitalCellSorter
-    at the moment only the genelist for the PBMC data is publically available
-    this one is therefore hardcoded here
-
-	
-	Parameters
-	----------
-	input_dir : directory of the input files
-	output_dir : directory of the output files
-	datafile : name of the data file
-    labfile : name of the label file
-    Rfile : file to read the cross validation indices from
-    numfeat : number of features to select, default = 0, which means that all features are used
-    featfile : file with sorted features to read
+    run DigitalCellSorter
+    Wrapper script to run DigitalCellSorter on a benchmark dataset using a predefined genelist,
+    outputs lists of true and predicted cell labels as csv files, as well as computation time.  
+  
+    Parameters
+    ----------
+    DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+    as row names and gene names as column names.
+    LabelsPath : Cell population annotations file path (.csv).
+    CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
+    GeneListPath : Data file path to the genest.
+    OutputDir : Output directory defining the path of the exported file.
+    GeneOrderPath : Gene order file path (.csv) obtained from feature selection, 
+    defining the genes order for each cross validation fold, default is NULL.
+    NumGenes : Number of genes used in case of feature selection (integer), default is 0.
     '''
-    
-    os.chdir(input_dir)
-    
+        
     # read the Rdata file
-    robjects.r['load'](Rfile)
+    robjects.r['load'](CV_RDataPath)
 
     tokeep = np.array(robjects.r['Cells_to_Keep'], dtype = 'bool')
+    col = np.array(robjects.r['col_Index'], dtype = 'int')
+    col = col - 1
     
     # read the data
-    data = pd.read_csv(datafile,index_col=0,sep=',')
+    data = pd.read_csv(DataPath,index_col=0,sep=',')
     data = data.iloc[tokeep]
+    
+    truelab = pd.read_csv(LabelsPath, header=0,index_col=None, sep=',', usecols = col)
+    truelab = truelab.iloc[tokeep]
+
 
     # read the feature file
-    if (numfeat > 0):
-        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
-        feat_to_use = features.iloc[0:numfeat,0]
+    if (NumGenes > 0):
+        features = pd.read_csv(GeneOrderPath,header=0,index_col=None, sep=',')
+        feat_to_use = features.iloc[0:NumGenes,0]
         data = data.iloc[:,feat_to_use]
         
     data = data.transpose()
     
     # number of different cell types in the data?
     n_clusters = 8
-    
     AvailableCPUsCount = 1
     N_samples_for_distribution = 10000
-    cellTypeNameForSubclustering = None #None  'B cells'  'T cells'
-
-    if cellTypeNameForSubclustering == 'B cells':
-        clusterIndex = [0]
-        geneListToUse = 'DigitalCellSorter/CIBERSORT_B_SUB.xlsx'
-    elif cellTypeNameForSubclustering == 'T cells':
-        clusterIndex = [2,6,7]
-        geneListToUse = 'DigitalCellSorter/CIBERSORT_T_SUB.xlsx'
-    else:
-        clusterIndex = None
-        geneListToUse = 'DigitalCellSorter/CIBERSORT.xlsx'
         
     start = tm.time()
     pred = DigitalCellSorter.DigitalCellSorter().Process(data, 'DigitalCellSorter_Zhang', 
-                                                saveDir = output_dir, 
-                                                geneListFileName = geneListToUse,
+                                                saveDir = OutputDir, 
+                                                geneListFileName = GeneListPath,
                                                 N_samples_for_distribution = N_samples_for_distribution,
                                                 AvailableCPUsCount = AvailableCPUsCount,
-                                                clusterIndex=clusterIndex,
-                                                clusterName=cellTypeNameForSubclustering,
+                                                clusterIndex=None,
+                                                clusterName=None,
                                                 n_clusters=n_clusters)	
     runtime = tm.time() - start 
     
-    os.chdir(output_dir)
+    os.chdir(OutputDir)
     
     results = pd.read_excel('DigitalCellSorter_Zhang_voting.xlsx',header=0,index_col=None, usecols=[11])
 
@@ -90,16 +74,15 @@ def run_DigitalCellSorter(input_dir,output_dir,datafile, labfile, Rfile, numfeat
     
     prediction = pd.DataFrame(prediction)
         
-    if (numfeat == 0):
-        prediction.to_csv('DigitalCellSorter_pred.csv', index = None)
-        
-        with open("DigitallCellSorter_time.csv", 'w') as f:
+    if (NumGenes == 0):  
+        truelab.to_csv("DigitalCellSorter_True_Labels.csv", index = False)
+        prediction.to_csv("DigitalCellSorter_Pred_Labels.csv", index = False)
+        with open("DigitalCellSorter_Total_Time.csv", 'w') as f:
             f.write("%f\n" % runtime)
-    
     else:
-        prediction.to_csv('DigitalCellSorter_' + str(numfeat) + "_pred_" + featfile, index = None)
-        
-        with open("DigitallCellSorter_" + str(numfeat) + "_time_" + featfile, 'w') as f:
+        truelab.to_csv("DigitalCellSorter_" + str(NumGenes) + "_True_Labels.csv", index = False)
+        prediction.to_csv("DigitalCellSorter_" + str(NumGenes) + "_Pred_Labels.csv", index = False)
+        with open("DigitalCellSorter_" + str(NumGenes) + "_Total_Time.csv", 'w') as f:
             f.write("%f\n" % runtime)
 
             

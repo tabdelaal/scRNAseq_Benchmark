@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Apr 24 13:35:53 2019
-
-@author: Lieke
-"""
-
 import os 
 import numpy as np
 import pandas as pd
@@ -17,23 +10,26 @@ from sklearn.neighbors import KNeighborsClassifier
 import rpy2.robjects as robjects
 
 
-def run_baseline(input_dir, output_dir, datafile, labfile, Rfile):
+def run_baseline(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", NumGenes = 0):
     '''
-    Run baseline classifiers: NMC, LDA, kNN, SVM, RF
-	
-	Parameters
-	----------
-	input_dir : directory of the input files
-	output_dir : directory of the output files
-	datafile : name of the data file
-    labfile : name of the label file
-    Rfile : file to read the cross validation indices from
+    run baseline classifiers: NMC, LDA, kNN, SVM, RF
+    Wrapper script to run baseline classifiers on a benchmark dataset with 5-fold cross validation,
+    outputs lists of true and predicted cell labels as csv files, as well as computation time.
+  
+    Parameters
+    ----------
+    DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+    as row names and gene names as column names.
+    LabelsPath : Cell population annotations file path (.csv).
+    CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
+    OutputDir : Output directory defining the path of the exported file.
+    GeneOrderPath : Gene order file path (.csv) obtained from feature selection, 
+    defining the genes order for each cross validation fold, default is NULL.
+    NumGenes : Number of genes used in case of feature selection (integer), default is 0.
     '''
-    
-    os.chdir(input_dir)
-    
+        
     # read the Rdata file
-    robjects.r['load'](Rfile)
+    robjects.r['load'](CV_RDataPath)
 
     nfolds = np.array(robjects.r['n_folds'], dtype = 'int')
     tokeep = np.array(robjects.r['Cells_to_Keep'], dtype = 'bool')
@@ -43,14 +39,18 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile):
     train_ind = np.array(robjects.r['Train_Idx'])
 
     # read the data
-    data = pd.read_csv(datafile,index_col=0,sep=',')
-    labels = pd.read_csv(labfile, header=0,index_col=None, sep=',', usecols = col)
+    data = pd.read_csv(DataPath,index_col=0,sep=',')
+    labels = pd.read_csv(LabelsPath, header=0,index_col=None, sep=',', usecols = col)
     
     labels = labels.iloc[tokeep]
     data = data.iloc[tokeep]
     
+    # read the feature file
+    if (NumGenes > 0):
+        features = pd.read_csv(GeneOrderPath,header=0,index_col=None, sep=',')
+    
     # folder with results
-    os.chdir(output_dir)
+    os.chdir(OutputDir)
     
     # normalize data
     data = np.log1p(data)
@@ -76,6 +76,11 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile):
             y_train=labels.iloc[train_ind_i]
             y_test=labels.iloc[test_ind_i]
             
+            if (NumGenes > 0):
+                feat_to_use = features.iloc[0:NumGenes,i]
+                train = train.iloc[:,feat_to_use]
+                test = test.iloc[:,feat_to_use]
+            
                 
             if c == 'RF':
                 Classifier=Classifiers[c](n_estimators = 50)
@@ -100,12 +105,18 @@ def run_baseline(input_dir, output_dir, datafile, labfile, Rfile):
         
         tr_time = pd.DataFrame(tr_time)
         ts_time = pd.DataFrame(ts_time)
-            
-        truelab.to_csv(c + "_" + str(col) + "_true.csv", index = False)
-        pred.to_csv(c + "_" + str(col) + "_pred.csv", index = False)
         
-        tr_time.to_csv(c + "_" + str(col) + "_training_time.csv", index = False)
-        ts_time.to_csv(c + "_" + str(col) + "_test_time.csv", index = False)
+        if (NumGenes == 0):  
+            truelab.to_csv(c + "_True_Labels.csv", index = False)
+            pred.to_csv(c + "_Pred_Labels.csv", index = False)
+            tr_time.to_csv(c + "_Training_Time.csv", index = False)
+            ts_time.to_csv(c + "_Testing_Time.csv", index = False)
+        else:
+            truelab.to_csv(c + "_" + str(NumGenes) + "_True_Labels.csv", index = False)
+            pred.to_csv(c + "_" + str(NumGenes) + "_Pred_Labels.csv", index = False)
+            tr_time.to_csv(c + "_" + str(NumGenes) + "_Training_Time.csv", index = False)
+            ts_time.to_csv(c + "_" + str(NumGenes) + "_Testing_Time.csv", index = False)
+
     
 
 

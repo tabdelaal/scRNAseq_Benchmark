@@ -1,40 +1,39 @@
-run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfile, genefile, CVFile, human){
+run_Garnett_CV <- function(DataPath, LabelsPath, CV_RDataPath, GenesPath, MarkerPath, Human){
   "
-  Run Garnett
-  
-  Wrapper script to run Garnett with using crossvalidation
+  run Garnett
+  Wrapper script to run Garnett on a benchmark dataset with 5-fold cross validation,
+  outputs lists of true and predicted cell labels as csv files, as well as computation time.
   
   Parameters
   ----------
-  input_dir : directory of the input files
-  output_dir : directory of the output files
-  datafile : name of the data file
-  labelfile : name of the file containing the labels
-  markerfile : name of the marker file
-  genefile : name of the file containing the genes
-  CVfile : name of the file containing cross validation indices
-  human : boolean to indicate the species (FALSE means mouse)
-  " 
-  setwd(input_dir)
-  
+  DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+  as row names and gene names as column names.
+  LabelsPath : Cell population annotations file path (.csv).
+  CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
+  GenesPath : Path to the file with the genenames
+  MarkerPath : Path to the file with marker genes
+  OutputDir : Output directory defining the path of the exported file.
+  Human : boolean indicating whether the dataset is human (TRUE) or mouse (FALSE)
+  "
+
   # load needed libraries
   library(garnett)
-  if (human) {
+  if (Human) {
     library(org.Hs.eg.db)
   } else {
     library(org.Mm.eg.db)
   }
   
   # load the CVFile
-  load(CVFile)
+  load(CV_RDataPath)
   
   # read the labels
-  labels <- as.matrix(read.csv(labelfile))
+  labels <- as.matrix(read.csv(LabelsPath))
   labels <- as.vector(labels[,col_Index])
   labels <- labels[Cells_to_Keep]
   
   # read the data
-  mat <- read.table(datafile, sep = ",")
+  mat <- read.table(DataPath, sep = ",")
   data <- mat[-1,-1]
   data <- data[Cells_to_Keep,]
   data <- t(data) #ensure that the genes are rows, and the cells are columns
@@ -43,7 +42,7 @@ run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfil
   cells <- cells[Cells_to_Keep]
   
   # read the genefile 
-  fdata <- read.table(genefile)
+  fdata <- read.table(GenesPath)
   names(fdata) <- 'gene_short_name'
   row.names(fdata) <- fdata$gene_short_name
   fd <- new("AnnotatedDataFrame", data = fdata)
@@ -85,14 +84,14 @@ run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfil
     
     if (human){
       pbmc_classifier <- train_cell_classifier(cds = pbmc_cds_train, 
-                                               marker_file = markerfile,
+                                               marker_file = MarkerPath,
                                                db=org.Hs.eg.db,
                                                cds_gene_id_type = "SYMBOL",
                                                num_unknown = 50,
                                                marker_file_gene_id_type = "SYMBOL")
     } else {
       pbmc_classifier <- train_cell_classifier(cds = pbmc_cds_train, 
-                                               marker_file = markerfile,
+                                               marker_file = MarkerPath,
                                                db=org.Mm.eg.db,
                                                cds_gene_id_type = "SYMBOL",
                                                num_unknown = 50,
@@ -131,13 +130,13 @@ run_Garnett_CV <- function(input_dir, output_dir, datafile, labelfile, markerfil
   pred_labels <- as.vector(unlist(pred_labels))
   train_time <- as.vector(unlist(train_time))
   test_time <- as.vector(unlist(test_time))
-
+  
   setwd(output_dir)
   
-  write.csv(train_time,'Garnett_test_time.csv',row.names = FALSE)
-  write.csv(test_time,'Garnett_training_time.csv',row.names = FALSE)
-  write.csv(true_labels, 'Garnett_true.csv', row.names = FALSE)
-  write.csv(pred_labels, 'Garnett_pred.csv', row.names = FALSE)
+  write.csv(train_time,'Garnett_CV_Testing_Time.csv',row.names = FALSE)
+  write.csv(test_time,'Garnett_CV_Training_Time.csv',row.names = FALSE)
+  write.csv(true_labels, 'Garnett_CV_True_Labels.csv', row.names = FALSE)
+  write.csv(pred_labels, 'Garnett_CV_Pred_Labels.csv', row.names = FALSE)
   
   
 }

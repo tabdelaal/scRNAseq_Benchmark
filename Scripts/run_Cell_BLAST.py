@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 25 14:35:09 2019
-
-@author: Lieke
-"""
-
 import os
 import time as tm
 import pandas as pd
@@ -20,25 +13,26 @@ from numpy import genfromtxt as gft
 import rpy2.robjects as robjects
 
 
-def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile,numfeat=0,featfile=''):
+def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", NumGenes = 0):
     '''
-    Run CellBlast
-	
-	Parameters
-	----------
-	input_dir : directory of the input files
-	output_dir : directory of the output files
-	datafile : name of the data file
-    labfile : name of the label file
-    Rfile : file to read the cross validation indices from
-    numfeat : number of features to select, default = 0, which means that all features are used
-    featfile : file with sorted features to read
+    run Cell_BLAST
+    Wrapper script to run Cell_BLAST on a benchmark dataset with 5-fold cross validation,
+    outputs lists of true and predicted cell labels as csv files, as well as computation time.
+  
+    Parameters
+    ----------
+    DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+    as row names and gene names as column names.
+    LabelsPath : Cell population annotations file path (.csv).
+    CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
+    OutputDir : Output directory defining the path of the exported file.
+    GeneOrderPath : Gene order file path (.csv) obtained from feature selection, 
+    defining the genes order for each cross validation fold, default is NULL.
+    NumGenes : Number of genes used in case of feature selection (integer), default is 0.
     '''
-    
-    os.chdir(input_dir)
-    
+        
     # read the Rdata file
-    robjects.r['load'](Rfile)
+    robjects.r['load'](CV_RDataPath)
 
     nfolds = np.array(robjects.r['n_folds'], dtype = 'int')
     tokeep = np.array(robjects.r['Cells_to_Keep'], dtype = 'bool')
@@ -48,20 +42,19 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile,numfeat=0,featfil
     train_ind = np.array(robjects.r['Train_Idx'])
     
     # read the feature file
-    if (numfeat > 0):
-        features = pd.read_csv(featfile,header=0,index_col=None, sep=',')
+    if (NumGenes > 0):
+        features = pd.read_csv(GeneOrderPath,header=0,index_col=None, sep=',')
 
     # read the data and labels
-    os.chdir(input_dir)
-    data_old = cb.data.ExprDataSet.read_table(input_dir + datafile,orientation="cg", sep=",", index_col = 0, header = 0)
-    labels = pd.read_csv(labfile, header=0,index_col=None, sep=',', usecols = col)
+    data_old = cb.data.ExprDataSet.read_table(DataPath,orientation="cg", sep=",", index_col = 0, header = 0)
+    labels = pd.read_csv(LabelsPath, header=0,index_col=None, sep=',', usecols = col)
     
     data = cb.data.ExprDataSet(data_old.exprs[tokeep],data_old.obs.iloc[tokeep],data_old.var,data_old.uns)
 
-    labels = gft(input_dir + labfile, dtype = "str", skip_header = 1, delimiter = ",", usecols = col)      
+    labels = gft(LabelsPath, dtype = "str", skip_header = 1, delimiter = ",", usecols = col)      
     labels = labels[tokeep]
 
-    os.chdir(output_dir)
+    os.chdir(OutputDir)
     
     truelab = []
     pred = []
@@ -77,8 +70,8 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile,numfeat=0,featfil
         y_train = labels[train_ind_i]
         y_test = labels[test_ind_i]
         
-        if (numfeat > 0):
-            feat_to_use = features.iloc[0:numfeat,i]
+        if (NumGenes > 0):
+            feat_to_use = features.iloc[0:NumGenes,i]
             train = train[:,feat_to_use]
             test = test[:,feat_to_use]
 
@@ -107,24 +100,21 @@ def run_Cell_BLAST(input_dir,output_dir,datafile,labfile,Rfile,numfeat=0,featfil
         truelab.extend(y_test)
         pred.extend(test_pred.values)
     
-    #write results
-    os.chdir(output_dir)
-    
+    #write results    
     truelab = pd.DataFrame(truelab)
     pred = pd.DataFrame(pred)
             
     tr_time = pd.DataFrame(tr_time)
     ts_time = pd.DataFrame(ts_time)
     
-    if (numfeat == 0):
-        truelab.to_csv("Cell_BLAST_" + str(col) +"_true.csv", index = False)
-        pred.to_csv("Cell_BLAST_" + str(col) +"_pred.csv", index = False)
-        tr_time.to_csv("Cell_BLAST_" + str(col) +"_training_time.csv", index = False)
-        ts_time.to_csv("Cell_BLAST_" + str(col) +"_test_time.csv", index = False)
+    if (NumGenes == 0):  
+        truelab.to_csv("Cell_BLAST_True_Labels.csv", index = False)
+        pred.to_csv("Cell_BLAST_Pred_Labels.csv", index = False)
+        tr_time.to_csv("Cell_BLAST_Training_Time.csv", index = False)
+        ts_time.to_csv("Cell_BLAST_Testing_Time.csv", index = False)
     else:
-        truelab.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_true_" + featfile, index = False)
-        pred.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_pred_" + featfile, index = False)
-        tr_time.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_training_time_" + featfile, index = False)
-        ts_time.to_csv("Cell_BLAST_" + str(col) + "_" + str(numfeat) + "_test_time_" + featfile, index = False)
-
+        truelab.to_csv("Cell_BLAST_" + str(NumGenes) + "_True_Labels.csv", index = False)
+        pred.to_csv("Cell_BLAST_" + str(NumGenes) + "_Pred_Labels.csv", index = False)
+        tr_time.to_csv("Cell_BLAST_" + str(NumGenes) + "_Training_Time.csv", index = False)
+        ts_time.to_csv("Cell_BLAST_" + str(NumGenes) + "_Testing_Time.csv", index = False)
         
