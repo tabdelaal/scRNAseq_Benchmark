@@ -1,4 +1,18 @@
-Run_SCINA<-function(DataPath,LabelsPath,GeneSigPath){
+run_SCINA<-function(DataPath,LabelsPath,GeneSigPath,OutputDir){
+  "
+  run SCINA
+  Wrapper script to run SCINA on a benchmark dataset,
+  outputs lists of true and predicted cell labels as csv files, as well as computation time.
+  
+  Parameters
+  ----------
+  DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+  as row names and gene names as column names.
+  LabelsPath : Cell population annotations file path (.csv).
+  GeneSigPath : Cell type marker genes file path (.csv)
+  OutputDir : Output directory defining the path of the exported file.
+  "
+  
   Data <- read.csv(DataPath,row.names = 1)
   Labels <- as.vector(as.matrix(read.csv(LabelsPath)))
   Data <- Data[is.element(Labels,c('CD14+ Monocyte','CD19+ B','CD56+ NK')),]
@@ -29,7 +43,10 @@ Run_SCINA<-function(DataPath,LabelsPath,GeneSigPath){
   True_Labels_SCINA <- Labels
   Pred_Labels_SCINA <- results$cell_labels
   Total_Time_SCINA <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-  write.csv(True_Labels_SCINA,'True_Labels_SCINA.csv',row.names = FALSE)
-  write.csv(Pred_Labels_SCINA,'Pred_Labels_SCINA.csv',row.names = FALSE)
-  write.csv(Total_Time_SCINA,'Total_Time_SCINA.csv',row.names = FALSE)
+  
+  setwd(OutputDir)
+  
+  write.csv(True_Labels_SCINA,'SCINA_True_Labels.csv',row.names = FALSE)
+  write.csv(Pred_Labels_SCINA,'SCINA_Pred_Labels.csv',row.names = FALSE)
+  write.csv(Total_Time_SCINA,'SCINA_Total_Time.csv',row.names = FALSE)
 }
