@@ -13,7 +13,7 @@ Rule for making the final report.
 """  #TODO
 rule make_final_report:
   input:
-    tool_outputs = expand("{output_dir}/{tool}/{tool}_true.csv",
+    tool_outputs = expand("{output_dir}/evaluation/Confusion/{tool}.csv",
         tool=config["tools_to_run"], output_dir=config["output_dir"])
   params:
     output_dir = config["output_dir"]
@@ -21,6 +21,26 @@ rule make_final_report:
     "{}/final_report".format(config["output_dir"])
   shell:
     "touch {params.output_dir}/final_report"
+    #TODO this should aggregate the evaluation results
+
+rule evaluate:
+  input:
+    true="{output_dir}/{tool}/{tool}_true.csv",
+    pred="{output_dir}/{tool}/{tool}_pred.csv"
+  output:
+    "{output_dir}/evaluation/Confusion/{tool}.csv",
+    "{output_dir}/evaluation/F1/{tool}.csv",
+    "{output_dir}/evaluation/PopSize/{tool}.csv",
+    "{output_dir}/evaluation/Summary/{tool}.csv",
+  log: "{output_dir}/evaluation/{tool}.log"
+  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  shell:
+    "Rscript evaluate.R "
+    "{input.true} "
+    "{input.pred} "
+    "{wildcards.output_dir}/evaluation "
+    "{wildcards.tool} "
+    "&> {log}"
 
 
 """
@@ -42,7 +62,7 @@ rule generate_CV_folds:
 
 
 """
-Rules for creating feature rank lists
+Rule for creating feature rank lists
 """
 rule generate_dropouts_feature_rankings:
     input:

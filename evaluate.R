@@ -1,3 +1,10 @@
+args <- commandArgs(TRUE)
+
+TrueLabelsPath <- args[1]
+PredLabelsPath <- args[2]
+OutputDir <- args[3]
+ToolName <- args[4]
+
 evaluate <- function(TrueLabelsPath, PredLabelsPath){
   "
   Script to evaluate the performance of the classifier.
@@ -67,3 +74,10 @@ evaluate <- function(TrueLabelsPath, PredLabelsPath){
 
   return(result)
 }
+
+results <- evaluate(TrueLabelsPath, PredLabelsPath)
+write.csv(results$Conf, file.path(OutputDir, "Confusion", paste0(ToolName, ".csv")))
+write.csv(results$F1, file.path(OutputDir, "F1", paste0(ToolName, ".csv")))
+write.csv(results$PopSize, file.path(OutputDir, "PopSize", paste0(ToolName, ".csv")))
+df <- data.frame(results[c("MedF1", "Acc", "PercUnl")])
+write.csv(df, file.path(OutputDir, "Summary", paste0(ToolName, ".csv")))
