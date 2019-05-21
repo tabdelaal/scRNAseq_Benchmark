@@ -1,11 +1,28 @@
-Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPath = NULL, num_of_genes = NULL){
+run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath, OutputDir, GeneOrderPath = NULL, NumGenes = NULL){
+  "
+  run CaSTLe
+  Wrapper script to run CaSTLe on a benchmark dataset with 5-fold cross validation,
+  outputs lists of true and predicted cell labels as csv files, as well as computation time.
+  
+  Parameters
+  ----------
+  DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+  as row names and gene names as column names.
+  LabelsPath : Cell population annotations file path (.csv).
+  CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
+  OutputDir : Output directory defining the path of the exported file.
+  GeneOrderPath : Gene order file path (.csv) obtained from feature selection, 
+  defining the genes order for each cross validation fold, default is NULL.
+  NumGenes : Number of genes used in case of feature selection (integer), default is NULL.
+  "
+  
   Data <- read.csv(DataPath,row.names = 1)
   Labels <- as.matrix(read.csv(LabelsPath))
   load(CV_RDataPath)
   Labels <- as.vector(Labels[,col_Index])
   Data <- Data[Cells_to_Keep,]
   Labels <- Labels[Cells_to_Keep]
-  if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
+  if(!is.null(GeneOrderPath) & !is.null (NumGenes)){
     GenesOrder = read.csv(GeneOrderPath)
   }
   
@@ -24,9 +41,9 @@ Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPath
   
   for(i in c(1:n_folds)){
     # 1. Load datasets
-    if(!is.null(GeneOrderPath) & !is.null (num_of_genes)){
-      ds1 = Data[Train_Idx[[i]],as.vector(GenesOrder[c(1:num_of_genes),i])+1]
-      ds2 = Data[Test_Idx[[i]],as.vector(GenesOrder[c(1:num_of_genes),i])+1]
+    if(!is.null(GeneOrderPath) & !is.null (NumGenes)){
+      ds1 = Data[Train_Idx[[i]],as.vector(GenesOrder[c(1:NumGenes),i])+1]
+      ds2 = Data[Test_Idx[[i]],as.vector(GenesOrder[c(1:NumGenes),i])+1]
     }
     else{
       ds1 = Data[Train_Idx[[i]],]
@@ -109,10 +126,10 @@ Run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath, output_dir, GeneOrderPath
   Pred_Labels_Castle <- as.vector(unlist(Pred_Labels_Castle))
   Training_Time_Castle <- as.vector(unlist(Training_Time_Castle))
   Testing_Time_Castle <- as.vector(unlist(Testing_Time_Castle))
-  write.csv(True_Labels_Castle,paste0(output_dir,'/CaSTLe_true.csv'),row.names = FALSE)
-  write.csv(Pred_Labels_Castle,paste0(output_dir,'/CaSTLe_pred.csv'),row.names = FALSE)
-  write.csv(Training_Time_Castle,paste0(output_dir,'/CaSTLe_training_time.csv'),row.names = FALSE)
-  write.csv(Testing_Time_Castle,paste0(output_dir,'/CaSTLe_test_time.csv'),row.names = FALSE)
+  write.csv(True_Labels_Castle,paste0(OutputDir,'/CaSTLe_true.csv'),row.names = FALSE)
+  write.csv(Pred_Labels_Castle,paste0(OutputDir,'/CaSTLe_pred.csv'),row.names = FALSE)
+  write.csv(Training_Time_Castle,paste0(OutputDir,'/CaSTLe_training_time.csv'),row.names = FALSE)
+  write.csv(Testing_Time_Castle,paste0(OutputDir,'/CaSTLe_test_time.csv'),row.names = FALSE)
 }
 
-Run_CaSTLe(args[1], args[2], args[3], args[4])
+run_CaSTLe(args[1], args[2], args[3], args[4])

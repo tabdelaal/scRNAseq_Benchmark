@@ -4,9 +4,8 @@ def feature_ranking(w):
     if "feature_ranking" in config.keys():
         return config["feature_ranking"]
     else:
-        return "{output_dir}/rank_genes_{method}.csv".format(
-            output_dir=w.output_dir,
-            method=config.get("feature_ranking_method", "dropouts"))
+        return "{output_dir}/rank_genes_dropouts.csv".format(
+            output_dir=w.output_dir)
 
 
 """
@@ -35,7 +34,7 @@ rule generate_CV_folds:
     column = config.get("column", 1) # default to 1
   singularity: "docker://scrnaseqbenchmark/cross_validation:latest"
   shell:
-    "Rscript Scripts/Cross_Validation.R "
+    "Rscript Cross_Validation.R "
     "{input} "
     "{params.column} "
     "{wildcards.output_dir} "
@@ -54,22 +53,7 @@ rule generate_dropouts_feature_rankings:
     singularity: "docker://scrnaseqbenchmark/baseline:latest"
     shell:
         "echo test > {wildcards.output_dir}/test\n"
-        "python3 Scripts/rank_gene_dropouts.py "
-        "{input.datafile} "
-        "{input.folds} "
-        "{wildcards.output_dir} "
-        "&> {log}"
-
-rule generate_CoV_feature_rankings:
-    input:
-        datafile = config["datafile"],
-        folds = "{output_dir}/CV_folds.RData"
-    output: "{output_dir}/rank_genes_CoV.csv"
-    log: "{output_dir}/rank_genes_CoV.log"
-    singularity: "docker://scrnaseqbenchmark/baseline:latest"
-    shell:
-        "echo test > {wildcards.output_dir}/test\n"
-        "python3 Scripts/rank_gene_CoV.py "
+        "python3 rank_gene_dropouts.py "
         "{input.datafile} "
         "{input.folds} "
         "{wildcards.output_dir} "
@@ -95,7 +79,7 @@ rule singleCellNet:
     n_features = config.get("number_of_features", 0)
   singularity: "docker://scrnaseqbenchmark/singlecellnet:latest"
   shell:
-    "Rscript Scripts/Run_singleCellNet.R "
+    "Rscript Scripts/run_singleCellNet.R "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
@@ -119,7 +103,7 @@ rule CHETAH:
     n_features = config.get("number_of_features", 0)
   singularity: "docker://scrnaseqbenchmark/chetah:latest"
   shell:
-    "Rscript Scripts/Run_CHETAH.R "
+    "Rscript Scripts/run_CHETAH.R "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
@@ -143,7 +127,7 @@ rule SingleR:
     n_features = config.get("number_of_features", 0)
   singularity: "docker://scrnaseqbenchmark/singler:latest"
   shell:
-    "Rscript Scripts/Run_SingleR.R "
+    "Rscript Scripts/run_SingleR.R "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
@@ -173,12 +157,12 @@ rule kNN:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_kNN.py "
-    "{wildcards.output_dir}/kNN "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{params.n_features} "
+    "{wildcards.output_dir}/kNN "
     "{input.ranking} "
+    "{params.n_features} "
     "&> {log}"
 
 rule LDA:
@@ -198,12 +182,12 @@ rule LDA:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_LDA.py "
-    "{wildcards.output_dir}/LDA "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{params.n_features} "
+    "{wildcards.output_dir}/LDA "
     "{input.ranking} "
+    "{params.n_features} "
     "&> {log}"
 
 rule NMC:
@@ -223,12 +207,12 @@ rule NMC:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_NMC.py "
-    "{wildcards.output_dir}/NMC "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{params.n_features} "
+    "{wildcards.output_dir}/NMC "
     "{input.ranking} "
+    "{params.n_features} "
     "&> {log}"
 
 rule RF:
@@ -248,12 +232,12 @@ rule RF:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_RF.py "
-    "{wildcards.output_dir}/RF "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{params.n_features} "
+    "{wildcards.output_dir}/RF "
     "{input.ranking} "
+    "{params.n_features} "
     "&> {log}"
 
 rule SVM:
@@ -273,10 +257,10 @@ rule SVM:
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
     "python3 Scripts/run_SVM.py "
-    "{wildcards.output_dir}/SVM "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{params.n_features} "
+    "{wildcards.output_dir}/SVM "
     "{input.ranking} "
+    "{params.n_features} "
     "&> {log}"

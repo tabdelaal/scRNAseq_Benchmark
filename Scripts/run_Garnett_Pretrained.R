@@ -1,39 +1,46 @@
-run_Garnett <- function(input_dir, output_dir, datafile, classifier, genefile, human){
+run_Garnett_Pretrained <- function(DataPath, LabelsPath, GenesPath, CV_RDataPath, ClassifierPath, OutputDir, Human){
   "
-  Run Garnett
-
-  Wrapper script to run Garnett with a pretrained classifier
+  run Garnett
+  Wrapper script to run Garnett on a benchmark dataset with a pretrained classifier,
+  outputs lists of true and predicted cell labels as csv files, as well as computation time.
   
   Parameters
   ----------
-  input_dir : directory of the input files
-  output_dir : directory of the output files
-  datafile : name of the data file
-  classifier : name of the file containing the pretrained classifier
-  genefile : name of the file containing the genes
-  human : boolean to indicate the species (FALSE means mouse)
-  " 
+  DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+  as row names and gene names as column names.
+  LabelsPath : Cell population annotations file path (.csv).
+  CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
+  GenesPath : Path to the file with the genenames
+  ClassifierPath : Path to the pretrained classifier
+  OutputDir : Output directory defining the path of the exported file.
+  Human : boolean indicating whether the dataset is human (TRUE) or mouse (FALSE)
+  "
   # load needed libraries
   library(garnett)
   
-  if (human) {
+  if (Human) {
     library(org.Hs.eg.db)
   } else {
     library(org.Mm.eg.db)
   }
   
   # load data, genes, and marker file
-  setwd(input_dir)
-  load(classifier)
+  load(CV_RDataPath)
   
-  mat <- read.table(datafile, sep = ",")
+  load(ClassifierPath)
+  
+  labels <- as.matrix(read.csv(LabelsPath))
+  labels <- labels[Cells_to_Keep]
+  
+  mat <- read.table(DataPath, sep = ",")
   data <- mat[-1,-1]
+  data <- data[Cells_to_Keep,]
   data <- t(data) #ensure that the genes are rows, and the cells are columns
   
   barcodes <- mat[-1,1]
   
   pdata = data.frame(barcodes)
-  fdata <- read.table(genefile)
+  fdata <- read.table(GenesPath)
   names(fdata) <- 'gene_short_name'
   row.names(fdata) <- fdata$gene_short_name
   
@@ -62,12 +69,14 @@ run_Garnett <- function(input_dir, output_dir, datafile, classifier, genefile, h
   
   setwd(output_dir)
   
-  write.table(pData(pbmc_cds)$cluster_ext_type, file = "Garnett_pred.csv", append = FALSE, quote = TRUE, sep = "\t",
+  write.table(pData(pbmc_cds)$cluster_ext_type, file = "Garnett_Pred_Labels.csv", append = FALSE, quote = TRUE, sep = "\t",
               eol = "\n", na = "NA", dec = ".", row.names = FALSE,
               qmethod = c("escape", "double"),
               fileEncoding = "")
   
-  write.csv(test_time,'Garnett_test_time.csv',row.names = FALSE)
+  write.csv(labels,"Garnett_Pretrained_True_Labels.csv", row.names = FALSE)
+  
+  write.csv(test_time,'Garnett_Pretrained_Testing_Time.csv',row.names = FALSE)
   
   
   
