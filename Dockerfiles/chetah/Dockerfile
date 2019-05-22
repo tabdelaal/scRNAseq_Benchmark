@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Scripts/Run_CHETAH.R \
+COPY Scripts/run_CHETAH.R \
      Dockerfiles/chetah/install_packages.R \
      /Scripts/
 

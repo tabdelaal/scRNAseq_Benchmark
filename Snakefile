@@ -160,27 +160,27 @@ rule SingleR:
 """
 Rules for python based tools.
 """
-rule kNN:
+rule kNN50:
   input:
     datafile = config["datafile"],
     labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
     ranking = feature_ranking
   output:
-    pred = "{output_dir}/kNN/kNN_pred.csv",
-    true = "{output_dir}/kNN/kNN_true.csv",
-    test_time = "{output_dir}/kNN/kNN_test_time.csv",
-    training_time = "{output_dir}/kNN/kNN_training_time.csv"
-  log: "{output_dir}/kNN/kNN.log"
+    pred = "{output_dir}/kNN50/kNN50_pred.csv",
+    true = "{output_dir}/kNN50/kNN50_true.csv",
+    test_time = "{output_dir}/kNN50/kNN50_test_time.csv",
+    training_time = "{output_dir}/kNN50/kNN50_training_time.csv"
+  log: "{output_dir}/kNN50/kNN50.log"
   params:
     n_features = config.get("number_of_features", 0)
   singularity: "docker://scrnaseqbenchmark/baseline:latest"
   shell:
-    "python3 Scripts/run_kNN.py "
+    "python3 Scripts/run_kNN50.py "
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{wildcards.output_dir}/kNN "
+    "{wildcards.output_dir}/kNN50 "
     "{input.ranking} "
     "{params.n_features} "
     "&> {log}"

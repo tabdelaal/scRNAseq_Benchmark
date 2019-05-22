@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Scripts/Run_SingleR.R \
+COPY Scripts/run_SingleR.R \
      Dockerfiles/singler/install_packages.R \
      /Scripts/
 

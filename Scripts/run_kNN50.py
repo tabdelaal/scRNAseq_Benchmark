@@ -5,14 +5,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import time as tm
-from sklearn.svm import LinearSVC
+from sklearn.neighbors import KNeighborsClassifier
 import rpy2.robjects as robjects
 
 
-def run_SVM(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", NumGenes = 0):
+def run_kNN50(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", NumGenes = 0):
     '''
-    run baseline classifier: SVM
-    Wrapper script to run an SVM classifier with a linear kernel on a benchmark dataset with 5-fold cross validation,
+    run baseline classifiers: kNN
+    Wrapper script to run kNN (with k = 50) classifier on a benchmark dataset with 5-fold cross validation,
     outputs lists of true and predicted cell labels as csv files, as well as computation time.
 
     Parameters
@@ -51,7 +51,7 @@ def run_SVM(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", N
     # normalize data
     data = np.log1p(data)
 
-    Classifier = LinearSVC()
+    Classifier = KNeighborsClassifier(n_neighbors=50)
 
     tr_time=[]
     ts_time=[]
@@ -90,13 +90,13 @@ def run_SVM(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", N
     ts_time = pd.DataFrame(ts_time)
 
     OutputDir = Path(OutputDir)
-    truelab.to_csv(str(OutputDir / Path("SVM_true.csv")),
+    truelab.to_csv(str(OutputDir / Path("kNN50_true.csv")),
                    index = False)
-    pred.to_csv(str(OutputDir / Path("SVM_pred.csv")),
+    pred.to_csv(str(OutputDir / Path("kNN50_pred.csv")),
                 index = False)
-    tr_time.to_csv(str(OutputDir / Path("SVM_training_time.csv")),
+    tr_time.to_csv(str(OutputDir / Path("kNN50_training_time.csv")),
                    index = False)
-    ts_time.to_csv(str(OutputDir / Path("SVM_test_time.csv")),
+    ts_time.to_csv(str(OutputDir / Path("kNN50_test_time.csv")),
                    index = False)
 
-run_SVM(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
+run_kNN50(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))

@@ -19,12 +19,10 @@ RUN apt-get update && \
     pip3 --no-cache-dir install pandas rpy2 scikit-learn statsmodels && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Scripts/run_baseline_all.py \
-     Scripts/run_kNN.py \
+COPY Scripts/run_kNN50.py \
      Scripts/run_LDA.py \
      Scripts/run_NMC.py \
      Scripts/run_RF.py \
      Scripts/run_SVM.py \
-     Scripts/rank_gene_dropouts \
-     Scripts/ranks_gene_CoV.py \
+     rank_gene_dropouts \
      /Scripts/

@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Scripts/Run_singleCellNet.R \
+COPY Scripts/run_singleCellNet.R \
      Dockerfiles/singlecellnet/install_packages.R \
      /Scripts/
 

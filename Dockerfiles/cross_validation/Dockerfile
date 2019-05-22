@@ -12,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY Scripts/Cross_Validation.R \
+COPY Cross_Validation.R \
      Dockerfiles/cross_validation/install_packages.R \
      /Scripts/
 
