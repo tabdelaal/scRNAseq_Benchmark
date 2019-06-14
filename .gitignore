@@ -2,3 +2,8 @@ data/
 workspace/
 .snakemake/
 __pycache__/
+*/.Rhistory
+.idea
+*/.idea
+.keras
+

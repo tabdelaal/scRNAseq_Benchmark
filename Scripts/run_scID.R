@@ -64,18 +64,10 @@ run_scID<-function(DataPath,LabelsPath,CV_RDataPath,OutputDir,GeneOrderPath = NU
   Pred_Labels_scID <- as.vector(unlist(Pred_Labels_scID))
   Total_Time_scID <- as.vector(unlist(Total_Time_scID))
 
-  setwd(OutputDir)
+  write.csv(Pred_Labels_scID, paste0(OutputDir,'/scID_pred.csv'),row.names = FALSE)
+  write.csv(True_Labels_scID, paste0(OutputDir,'/scID_true.csv'),row.names = FALSE)
+  write.csv(Total_Time_scID,paste0(OutputDir,'/scID_total_time.csv'),row.names = FALSE)
 
-  if(!is.null(GeneOrderPath) & !is.null (NumGenes)){
-    write.csv(True_Labels_scID,paste('scID_',NumGenes,'_true', sep = ''),row.names = FALSE)
-    write.csv(Pred_Labels_scID,paste('scID_',NumGenes,'_pred', sep = ''),row.names = FALSE)
-    write.csv(Total_Time_scID,paste('scID_',NumGenes,'_total_time.csv', sep = ''),row.names = FALSE)
-  }
-  else{
-    write.csv(Pred_Labels_scID,'scID_pred.csv',row.names = FALSE)
-    write.csv(True_Labels_scID,'scID_true.csv',row.names = FALSE)
-    write.csv(Total_Time_scID,'scID_total_time.csv',row.names = FALSE)
-  }
 }
 if (args[6] == "0") {
   run_scID(args[1], args[2], args[3], args[4])

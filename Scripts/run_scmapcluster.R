@@ -89,21 +89,13 @@ run_scmapcluster <- function(DataPath,LabelsPath,CV_RDataPath,OutputDir,GeneOrde
   Pred_Labels_scmapcluster <- as.vector(unlist(Pred_Labels_scmapcluster))
   Training_Time_scmapcluster <- as.vector(unlist(Training_Time_scmapcluster))
   Testing_Time_scmapcluster <- as.vector(unlist(Testing_Time_scmapcluster))
-  
-  setwd(OutputDir)
-  
-  if (!is.null(GeneOrderPath) & !is.null (NumGenes)){
-    write.csv(True_Labels_scmapcluster,paste('scmapcluster_',NumGenes,'_true.csv', sep = ''),row.names = FALSE)
-    write.csv(Pred_Labels_scmapcluster,paste('scmapcluster_',NumGenes,'_pred', sep = ''),row.names = FALSE)
-    write.csv(Training_Time_scmapcluster,paste('scmapcluster_',NumGenes,'_training_time.csv', sep = ''),row.names = FALSE)
-    write.csv(Testing_Time_scmapcluster,paste('scmapcluster_',NumGenes,'_test_time.csv', sep = ''),row.names = FALSE)
-  }
-  else{
-    write.csv(True_Labels_scmapcluster,'scmapcluster_true.csv',row.names = FALSE)
-    write.csv(Pred_Labels_scmapcluster,'scmapcluster_pred.csv',row.names = FALSE)
-    write.csv(Training_Time_scmapcluster,'scmapcluster_training_time.csv',row.names = FALSE)
-    write.csv(Testing_Time_scmapcluster,'scmapcluster_test_time.csv',row.names = FALSE)
-  }
+
+  write.csv(True_Labels_scmapcluster,paste0(OutputDir,'/scmapcluster_true.csv'),row.names = FALSE)
+  write.csv(Pred_Labels_scmapcluster,paste0(OutputDir,'/scmapcluster_pred.csv'),row.names = FALSE)
+  write.csv(Training_Time_scmapcluster,paste0(OutputDir,'/scmapcluster_training_time.csv'),row.names = FALSE)
+  write.csv(Testing_Time_scmapcluster,paste0(OutputDir,'/scmapcluster_test_time.csv'),row.names = FALSE)
+
+
 }
 if (args[6] == "0") {
   run_scmapcluster(args[1], args[2], args[3], args[4])

@@ -91,20 +91,10 @@ run_scmapcell <- function(DataPath,LabelsPath,CV_RDataPath,OutputDir,GeneOrderPa
   Training_Time_scmapcell <- as.vector(unlist(Training_Time_scmapcell))
   Testing_Time_scmapcell <- as.vector(unlist(Testing_Time_scmapcell))
   
-  setwd(OutputDir)
-  
-  if (!is.null(GeneOrderPath) & !is.null (NumGenes)){
-    write.csv(True_Labels_scmapcell,paste('scmapcell_',NumGenes,'_true.csv', sep = ''),row.names = FALSE)
-    write.csv(Pred_Labels_scmapcell,paste('scmapcell_',NumGenes,'_pred.csv', sep = ''),row.names = FALSE)
-    write.csv(Training_Time_scmapcell,paste('scmapcell_',NumGenes,'_training_time.csv', sep = ''),row.names = FALSE)
-    write.csv(Testing_Time_scmapcell,paste('scmapcell_',NumGenes,'_test_time.csv', sep = ''),row.names = FALSE)
-  }
-  else{
-    write.csv(True_Labels_scmapcell,'scmapcell_true.csv',row.names = FALSE)
-    write.csv(Pred_Labels_scmapcell,'scmapcell_pred.csv',row.names = FALSE)
-    write.csv(Training_Time_scmapcell,'scmapcell_training_time.csv',row.names = FALSE)
-    write.csv(Testing_Time_scmapcell,'scmapcell_test_time.csv',row.names = FALSE)
-  }
+  write.csv(True_Labels_scmapcell,paste0(OutputDir,'/scmapcell_true.csv'),row.names = FALSE)
+  write.csv(Pred_Labels_scmapcell,paste0(OutputDir,'/scmapcell_pred.csv'),row.names = FALSE)
+  write.csv(Training_Time_scmapcell,paste0(OutputDir,'/scmapcell_training_time.csv'),row.names = FALSE)
+  write.csv(Testing_Time_scmapcell,paste0(OutputDir,'/scmapcell_test_time.csv'),row.names = FALSE)
 }
 if (args[6] == "0") {
   run_scmapcell(args[1], args[2], args[3], args[4])

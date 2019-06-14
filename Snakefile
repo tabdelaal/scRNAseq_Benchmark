@@ -259,18 +259,18 @@ rule kNN50:
     "{params.n_features} "
     "&> {log}"
 
-rule cell_blast:
+rule Cell_BLAST:
   input:
     datafile = config["datafile"],
     labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
     ranking = feature_ranking
   output:
-    pred = "{output_dir}/cell_blast/cell_blast_pred.csv",
-    true = "{output_dir}/cell_blast/cell_blast_true.csv",
-    test_time = "{output_dir}/cell_blast/cell_blast_test_time.csv",
-    training_time = "{output_dir}/cell_blast/cell_blast_training_time.csv"
-  log: "{output_dir}/cell_blast/cell_blast.log"
+    pred = "{output_dir}/Cell_BLAST/Cell_BLAST_pred.csv",
+    true = "{output_dir}/Cell_BLAST/Cell_BLAST_true.csv",
+    test_time = "{output_dir}/Cell_BLAST/Cell_BLAST_test_time.csv",
+    training_time = "{output_dir}/Cell_BLAST/Cell_BLAST_training_time.csv"
+  log: "{output_dir}/Cell_BLAST/Cell_BLAST.log"
   params:
     n_features = config.get("number_of_features", 0)
   singularity: "docker://ddhoogduin/cell_blast:latest"
@@ -279,23 +279,23 @@ rule cell_blast:
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{wildcards.output_dir}/cell_blast "
+    "{wildcards.output_dir}/Cell_BLAST "
     "{input.ranking} "
     "{params.n_features} "
     "&> {log}"
 
-rule scvi:
+rule scVI:
   input:
     datafile = config["datafile"],
     labfile = config["labfile"],
     folds = "{output_dir}/CV_folds.RData",
     ranking = feature_ranking
   output:
-    pred = "{output_dir}/scvi/scvi_pred.csv",
-    true = "{output_dir}/scvi/scvi_true.csv",
-    test_time = "{output_dir}/scvi/scvi_test_time.csv",
-    training_time = "{output_dir}/scvi/scvi_training_time.csv"
-  log: "{output_dir}/scvi/scvi.log"
+    pred = "{output_dir}/scVI/scVI_pred.csv",
+    true = "{output_dir}/scVI/scVI_true.csv",
+    test_time = "{output_dir}/scVI/scVI_test_time.csv",
+    training_time = "{output_dir}/scVI/scVI_training_time.csv"
+  log: "{output_dir}/scVI/scVI.log"
   params:
     n_features = config.get("number_of_features", 0)
   singularity: "docker://ddhoogduin/scvi:latest"
@@ -304,7 +304,7 @@ rule scvi:
     "{input.datafile} "
     "{input.labfile} "
     "{input.folds} "
-    "{wildcards.output_dir}/scvi "
+    "{wildcards.output_dir}/scVI "
     "{input.ranking} "
     "{params.n_features} "
     "&> {log}"

@@ -32,7 +32,6 @@ def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath 
     defining the genes order for each cross validation fold, default is NULL.
     NumGenes : Number of genes used in case of feature selection (integer), default is 0.
     '''
-    print('test')
     # read the Rdata file
     robjects.r['load'](CV_RDataPath)
 
@@ -55,8 +54,6 @@ def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath 
 
     labels = gft(LabelsPath, dtype = "str", skip_header = 1, delimiter = ",", usecols = col)
     labels = labels[tokeep]
-
-    os.chdir(OutputDir)
 
     truelab = []
     pred = []
@@ -88,7 +85,7 @@ def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath 
         models = []
 
         for j in range(4):
-            models.append(cb.directi.fit_DIRECTi(train, epoch=num_epoch, patience=10, random_seed = j, path="%d" % j))
+            models.append(cb.directi.fit_DIRECTi(train, epoch=num_epoch, patience=10, random_seed = j, path=OutputDir+"/%d" % j))
 
         # train model
         blast = cb.blast.BLAST(models, train).build_empirical()
@@ -108,18 +105,11 @@ def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath 
 
     tr_time = pd.DataFrame(tr_time)
     ts_time = pd.DataFrame(ts_time)
-    OutputDir = Path(OutputDir)
-    if not os.path.exists(OutputDir):
-        os.makedirs(OutputDir)
-    if (NumGenes == 0):
-        print('test')
-        truelab.to_csv(str(Path("cell_blast_true.csv")),index = False)
-        pred.to_csv(str(Path("cell_blast_pred.csv")),index = False)
-        tr_time.to_csv(str(Path("cell_blast_training_time.csv")), index = False)
-        ts_time.to_csv(str(Path("cell_blast_test_time.csv")),index = False)
-    else:
-        truelab.to_csv(str(Path("cell_blast_" + str(NumGenes) + "_true.csv")),index = False)
-        pred.to_csv(str(Path("cell_blast_" + str(NumGenes) + "_pred.csv")),index = False)
-        tr_time.to_csv(str(Path("cell_blast_" + str(NumGenes) + "_training_time.csv")), index = False)
-        ts_time.to_csv(str(Path("cell_blast_" + str(NumGenes) + "_test_time.csv")),index = False)
+
+    truelab.to_csv(str(Path(OutputDir+"/Cell_BLAST_true.csv")),index = False)
+    pred.to_csv(str(Path(OutputDir+"/Cell_BLAST_pred.csv")),index = False)
+    tr_time.to_csv(str(Path(OutputDir+"/Cell_BLAST_training_time.csv")), index = False)
+    ts_time.to_csv(str(Path(OutputDir+"/Cell_BLAST_test_time.csv")),index = False)
+
+
 run_Cell_BLAST(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
