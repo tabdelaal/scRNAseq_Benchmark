@@ -1,0 +1,9 @@
+output_dir: output
+datafile: input/data.csv
+labfile: input/Labels.csv
+column: 1
+number_of_features: 0
+tools_to_run:
+  - cell_blast
+  - scvi
+  - scmapcell 

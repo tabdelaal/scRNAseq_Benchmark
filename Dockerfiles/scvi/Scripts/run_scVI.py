@@ -1,7 +1,5 @@
-import os
-from sys import argv
-from pathlib import Path
 from scvi.dataset import CsvDataset
+import os
 import numpy as np
 import pandas as pd
 from scvi.models import SCANVI
@@ -111,20 +109,17 @@ def run_scVI(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", 
     tr_time = pd.DataFrame(tr_time)
     ts_time = pd.DataFrame(ts_time)
 
-    OutputDir = Path(OutputDir)
-    if not os.path.exists(OutputDir):
-        os.makedirs(OutputDir)
-    if (NumGenes == 0):
-        truelab.to_csv(str(Path("scvi_true.csv")),index = False)
-        pred.to_csv(str(Path("scvi_pred.csv")),index = False)
-        tr_time.to_csv(str(Path("scvi_training_time.csv")), index = False)
-        ts_time.to_csv(str(Path("scvi_test_time.csv")),index = False)
+    
+    if (NumGenes == 0):  
+        truelab.to_csv("scVI_True_Labels.csv", index = False)
+        pred.to_csv("scVI_Pred_Labels.csv", index = False)
+        tr_time.to_csv("scVI_Training_Time.csv", index = False)
+        ts_time.to_csv("scVI_Testing_Time.csv", index = False)
     else:
-        truelab.to_csv(str(Path("scvi_" + str(NumGenes) + "_true.csv")),index = False)
-        pred.to_csv(str(Path("scvi_" + str(NumGenes) + "_pred.csv")),index = False)
-        tr_time.to_csv(str(Path("scvi_" + str(NumGenes) + "_training_time.csv")), index = False)
-        ts_time.to_csv(str(Path("scvi_" + str(NumGenes) + "_test_time.csv")),index = False)
-
-run_scVI(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
+        truelab.to_csv("scVI_" + str(NumGenes) + "_True_Labels.csv", index = False)
+        pred.to_csv("scVI_" + str(NumGenes) + "_Pred_Labels.csv", index = False)
+        tr_time.to_csv("scVI_" + str(NumGenes) + "_Training_Time.csv", index = False)
+        ts_time.to_csv("scVI_" + str(NumGenes) + "_Testing_Time.csv", index = False)
+        
 
 
