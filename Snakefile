@@ -108,6 +108,80 @@ rule singleCellNet:
     "{params.n_features} "
     "&> {log}"
 
+rule scmapcell:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/scmapcell/scmapcell_pred.csv",
+    true = "{output_dir}/scmapcell/scmapcell_true.csv",
+    test_time = "{output_dir}/scmapcell/scmapcell_test_time.csv",
+    training_time = "{output_dir}/scmapcell/scmapcell_training_time.csv"
+  log: "{output_dir}/scmapcell/scmapcell.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://ddhoogduin/scmap:latest"
+  shell:
+    "Rscript Scripts/run_scmapcell.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/scmapcell "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
+rule scmapcluster:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/scmapcluster/scmapcluster_pred.csv",
+    true = "{output_dir}/scmapcluster/scmapcluster_true.csv",
+    test_time = "{output_dir}/scmapcluster/scmapcluster_test_time.csv",
+    training_time = "{output_dir}/scmapcluster/scmapcluster_training_time.csv"
+  log: "{output_dir}/scmapcluster/scmapcluster.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://ddhoogduin/scmap:latest"
+  shell:
+    "Rscript Scripts/run_scmapcluster.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/scmapcluster "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
+rule scID:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/scID/scID_pred.csv",
+    true = "{output_dir}/scID/scID_true.csv",
+    total_time = "{output_dir}/scID/scID_total_time.csv"
+  log: "{output_dir}/scID/scID.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://ddhoogduin/scid:latest"
+  shell:
+    "Rscript Scripts/run_scID.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/scID "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
 rule CHETAH:
   input:
     datafile = config["datafile"],
@@ -181,6 +255,56 @@ rule kNN50:
     "{input.labfile} "
     "{input.folds} "
     "{wildcards.output_dir}/kNN50 "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
+rule Cell_BLAST:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/Cell_BLAST/Cell_BLAST_pred.csv",
+    true = "{output_dir}/Cell_BLAST/Cell_BLAST_true.csv",
+    test_time = "{output_dir}/Cell_BLAST/Cell_BLAST_test_time.csv",
+    training_time = "{output_dir}/Cell_BLAST/Cell_BLAST_training_time.csv"
+  log: "{output_dir}/Cell_BLAST/Cell_BLAST.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://ddhoogduin/cell_blast:latest"
+  shell:
+    "python3 Scripts/run_Cell_BLAST.py "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/Cell_BLAST "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
+rule scVI:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/scVI/scVI_pred.csv",
+    true = "{output_dir}/scVI/scVI_true.csv",
+    test_time = "{output_dir}/scVI/scVI_test_time.csv",
+    training_time = "{output_dir}/scVI/scVI_training_time.csv"
+  log: "{output_dir}/scVI/scVI.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://ddhoogduin/scvi:latest"
+  shell:
+    "python3 Scripts/run_scVI.py "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/scVI "
     "{input.ranking} "
     "{params.n_features} "
     "&> {log}"
