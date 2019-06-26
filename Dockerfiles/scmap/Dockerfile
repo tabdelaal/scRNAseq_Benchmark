@@ -1,6 +1,5 @@
 FROM r-base:3.6.0
 
-
 COPY Scripts/run_scmapcell.R \
      Scripts/run_scmapcluster.R \
      Dockerfiles/scmap/install_packages.R \

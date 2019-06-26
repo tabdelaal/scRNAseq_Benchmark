@@ -45,6 +45,11 @@ tools_to_run: # List of tools to run
 - SVM
 - [singleCellNet](https://github.com/pcahan1/singleCellNet)
 - [CHETAH](https://github.com/jdekanter/CHETAH)
+- [Scmap]()
+- [SingleR]()
+- [scID]()
+- [scVI]()
+- [Cell_BLAST]()
 
 ## Adding new tools
 In order to add a tool to this benchmarking workflow, a rule for this tool

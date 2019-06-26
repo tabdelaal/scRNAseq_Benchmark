@@ -1,6 +1,5 @@
 FROM r-base:3.6.0
 
-
 COPY Scripts/run_scID.R \
      Dockerfiles/scid/install_packages.R \
      /Scripts/
