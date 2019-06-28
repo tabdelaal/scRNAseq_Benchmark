@@ -126,10 +126,18 @@ run_CaSTLe<-function(DataPath,LabelsPath,CV_RDataPath, OutputDir, GeneOrderPath 
   Pred_Labels_Castle <- as.vector(unlist(Pred_Labels_Castle))
   Training_Time_Castle <- as.vector(unlist(Training_Time_Castle))
   Testing_Time_Castle <- as.vector(unlist(Testing_Time_Castle))
-  write.csv(True_Labels_Castle,paste0(OutputDir,'/CaSTLe_true.csv'),row.names = FALSE)
-  write.csv(Pred_Labels_Castle,paste0(OutputDir,'/CaSTLe_pred.csv'),row.names = FALSE)
-  write.csv(Training_Time_Castle,paste0(OutputDir,'/CaSTLe_training_time.csv'),row.names = FALSE)
-  write.csv(Testing_Time_Castle,paste0(OutputDir,'/CaSTLe_test_time.csv'),row.names = FALSE)
+  
+  if(!is.null(GeneOrderPath) & !is.null (NumGenes)){
+    write.csv(True_Labels_Castle,paste('True_Labels_Castle_',NumGenes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Pred_Labels_Castle,paste('Pred_Labels_Castle_',NumGenes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Training_Time_Castle,paste('Training_Time_Castle_',NumGenes,'.csv', sep = ''),row.names = FALSE)
+    write.csv(Testing_Time_Castle,paste('Testing_Time_Castle_',NumGenes,'.csv', sep = ''),row.names = FALSE)
+  }
+  else{
+    write.csv(True_Labels_Castle,'True_Labels_CaSTLe.csv',row.names = FALSE)
+    write.csv(Pred_Labels_Castle,'Pred_Labels_CaSTLe.csv',row.names = FALSE)
+    write.csv(Training_Time_Castle,'Training_Time_CaSTLe.csv',row.names = FALSE)
+    write.csv(Testing_Time_Castle,'Testing_Time_CaSTLe.csv',row.names = FALSE)
+  }
+  
 }
-
-run_CaSTLe(args[1], args[2], args[3], args[4])

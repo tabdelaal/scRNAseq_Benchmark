@@ -1,4 +1,4 @@
-#TODO replace all 'latest' tags with actual verions
+dockerTag = "latest"
 
 def feature_ranking(w):
     if "feature_ranking" in config.keys():
@@ -7,22 +7,21 @@ def feature_ranking(w):
         return "{output_dir}/rank_genes_dropouts.csv".format(
             output_dir=w.output_dir)
 
+"""
+One rule to... rule... them all...
+"""
+rule all:
+  input:
+    tool_outputs = expand(
+        "{output_dir}/evaluation/{measure}/{tool}.csv",
+        tool=config["tools_to_run"],
+        output_dir=config["output_dir"],
+        measure=["Confusion", "F1", "PopSize", "Summary"])
+
 
 """
-Rule for making the final report.
-"""  #TODO
-rule make_final_report:
-  input:
-    tool_outputs = expand("{output_dir}/evaluation/Confusion/{tool}.csv",
-        tool=config["tools_to_run"], output_dir=config["output_dir"])
-  params:
-    output_dir = config["output_dir"]
-  output:
-    "{}/final_report".format(config["output_dir"])
-  shell:
-    "touch {params.output_dir}/final_report"
-    #TODO this should aggregate the evaluation results
-
+Rule for the result evaluation
+"""
 rule evaluate:
   input:
     true="{output_dir}/{tool}/{tool}_true.csv",
@@ -33,7 +32,7 @@ rule evaluate:
     "{output_dir}/evaluation/PopSize/{tool}.csv",
     "{output_dir}/evaluation/Summary/{tool}.csv",
   log: "{output_dir}/evaluation/{tool}.log"
-  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "Rscript evaluate.R "
     "{input.true} "
@@ -52,7 +51,7 @@ rule generate_CV_folds:
   log: "{output_dir}/CV_folds.log"
   params:
     column = config.get("column", 1) # default to 1
-  singularity: "docker://scrnaseqbenchmark/cross_validation:latest"
+  singularity: "docker://scrnaseqbenchmark/cross_validation:{}".format(dockerTag)
   shell:
     "Rscript Cross_Validation.R "
     "{input} "
@@ -70,7 +69,7 @@ rule generate_dropouts_feature_rankings:
         folds = "{output_dir}/CV_folds.RData"
     output: "{output_dir}/rank_genes_dropouts.csv"
     log: "{output_dir}/rank_genes_dropouts.log"
-    singularity: "docker://scrnaseqbenchmark/baseline:latest"
+    singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
     shell:
         "echo test > {wildcards.output_dir}/test\n"
         "python3 rank_gene_dropouts.py "
@@ -97,7 +96,7 @@ rule singleCellNet:
   log: "{output_dir}/singleCellNet/singleCellNet.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/singlecellnet:latest"
+  singularity: "docker://scrnaseqbenchmark/singlecellnet:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_singleCellNet.R "
     "{input.datafile} "
@@ -122,7 +121,7 @@ rule scmapcell:
   log: "{output_dir}/scmapcell/scmapcell.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://ddhoogduin/scmap:latest"
+  singularity: "docker://scrnaseqbenchmark/scmap:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_scmapcell.R "
     "{input.datafile} "
@@ -147,7 +146,7 @@ rule scmapcluster:
   log: "{output_dir}/scmapcluster/scmapcluster.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://ddhoogduin/scmap:latest"
+  singularity: "docker://scrnaseqbenchmark/scmap:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_scmapcluster.R "
     "{input.datafile} "
@@ -171,7 +170,7 @@ rule scID:
   log: "{output_dir}/scID/scID.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://ddhoogduin/scid:latest"
+  singularity: "docker://scrnaseqbenchmark/scid:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_scID.R "
     "{input.datafile} "
@@ -195,7 +194,7 @@ rule CHETAH:
   log: "{output_dir}/CHETAH/CHETAH.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/chetah:latest"
+  singularity: "docker://scrnaseqbenchmark/chetah:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_CHETAH.R "
     "{input.datafile} "
@@ -219,7 +218,7 @@ rule SingleR:
   log: "{output_dir}/SingleR/SingleR.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/singler:latest"
+  singularity: "docker://scrnaseqbenchmark/singler:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_SingleR.R "
     "{input.datafile} "
@@ -228,6 +227,63 @@ rule SingleR:
     "{wildcards.output_dir}/SingleR "
     "{input.ranking} "
     "{params.n_features} "
+    "&> {log}"
+
+#NOTE non-conformant to the rest of the rules.
+rule Garnett_CV:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    genes_names = config.get("genes", "UNSPECIFIEDFILE"),
+    markers = config.get("Garnett_CV", {}).get(
+        "markers", "UNSPECIFIEDFILE")
+  output:
+    pred = "{output_dir}/Garnett_CV/Garnett_CV_pred.csv",
+    true = "{output_dir}/Garnett_CV/Garnett_CV_true.csv",
+    test_time = "{output_dir}/Garnett_CV/Garnett_CV_test_time.csv",
+    training_time = "{output_dir}/Garnett_CV/Garnett_CV_training_time.csv"
+  log: "{output_dir}/Garnett_CV/Garnett_CV.log"
+  params:
+    human = "T" if config.get("human", True) else "F"
+  singularity: "docker://scrnaseqbenchmark/garnett:{}".format(dockerTag)
+  shell:
+    "Rscript Scripts/run_Garnett_CV.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{input.genes_names} "
+    "{input.markers} "
+    "{wildcards.output_dir}/Garnett_CV "
+    "{params.human} "
+    "&> {log}"
+
+#NOTE non-conformant to the rest of the rules.
+rule Garnett_Pretrained: #TODO test this
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    genes_names = config.get("genes", "UNSPECIFIEDFILE"),
+    classifier = config.get("Garnett_Pretrained", {}).get(
+        "classifier", "UNSPECIFIEDFILE")
+  output:
+    pred = "{output_dir}/Garnett_Pretrained/Garnett_Pretrained_pred.csv",
+    true = "{output_dir}/Garnett_Pretrained/Garnett_Pretrained_true.csv",
+    test_time = "{output_dir}/Garnett_Pretrained/Garnett_Pretrained_test_time.csv"
+  log: "{output_dir}/Garnett_Pretrained/Garnett_Pretrained.log"
+  params:
+    human = "T" if config.get("human", True) else "F"
+  singularity: "docker://scrnaseqbenchmark/garnett:{}".format(dockerTag)
+  shell:
+    "Rscript Scripts/run_Garnett_Pretrained.R "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.genes_names} "
+    "{input.folds} "
+    "{input.classifier} "
+    "{wildcards.output_dir}/Garnett_Pretrained "
+    "{params.human} "
     "&> {log}"
 
 
@@ -248,7 +304,7 @@ rule kNN50:
   log: "{output_dir}/kNN50/kNN50.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_kNN50.py "
     "{input.datafile} "
@@ -273,7 +329,7 @@ rule Cell_BLAST:
   log: "{output_dir}/Cell_BLAST/Cell_BLAST.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://ddhoogduin/cell_blast:latest"
+  singularity: "docker://scrnaseqbenchmark/cell_blast:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_Cell_BLAST.py "
     "{input.datafile} "
@@ -298,7 +354,7 @@ rule scVI:
   log: "{output_dir}/scVI/scVI.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://ddhoogduin/scvi:latest"
+  singularity: "docker://scrnaseqbenchmark/scvi:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_scVI.py "
     "{input.datafile} "
@@ -323,7 +379,7 @@ rule LDA:
   log: "{output_dir}/LDA/LDA.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_LDA.py "
     "{input.datafile} "
@@ -348,7 +404,7 @@ rule NMC:
   log: "{output_dir}/NMC/NMC.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_NMC.py "
     "{input.datafile} "
@@ -373,7 +429,7 @@ rule RF:
   log: "{output_dir}/RF/RF.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_RF.py "
     "{input.datafile} "
@@ -398,7 +454,7 @@ rule SVM:
   log: "{output_dir}/SVM/SVM.log"
   params:
     n_features = config.get("number_of_features", 0)
-  singularity: "docker://scrnaseqbenchmark/baseline:latest"
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_SVM.py "
     "{input.datafile} "

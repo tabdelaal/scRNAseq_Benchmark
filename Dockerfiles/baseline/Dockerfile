@@ -24,5 +24,5 @@ COPY Scripts/run_kNN50.py \
      Scripts/run_NMC.py \
      Scripts/run_RF.py \
      Scripts/run_SVM.py \
-     rank_gene_dropouts \
+     rank_gene_dropouts.py \
      /Scripts/

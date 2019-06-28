@@ -29,12 +29,28 @@ datafile: <path to csv file with counts per cell>
 labfile: <csv with true labels per cell>
 column: <The index of the column in the labels file which ought to be used, defaults to 1>
 number_of_features: <number of features to be used as input for the classification methods, 0 means all, defaults to 0>
+genes: <path to gene name list, only needed for garnett_CV and Garnett_Pretrained>
+human: <whether or not the data is human, true means human, false means mouse, defaults to true>
 tools_to_run: # List of tools to run
   - <tool 1>
   - <tool 2>
   - <...>
-
 ```
+
+##### Tool specific inputs
+Some tools require specific inputs. Add the following to your config file when
+one of these tools:
+- Garnett_CV
+  ```YML
+  Garnett_CV:
+    markers: <path to Gernett marker gene file>
+  ```
+- Garnett_Pretrained
+  ```YML
+  Garnett_Pretrained:
+    classifier: <path to Gernett classifier>
+  ```
+
 <!-- TODO explain these input files -->
 
 ## Included tools/methods
@@ -45,11 +61,16 @@ tools_to_run: # List of tools to run
 - SVM
 - [singleCellNet](https://github.com/pcahan1/singleCellNet)
 - [CHETAH](https://github.com/jdekanter/CHETAH)
-- [Scmap]()
-- [SingleR]()
-- [scID]()
-- [scVI]()
-- [Cell_BLAST]()
+- [scmap](https://github.com/hemberg-lab/scmap)
+  - scmapcell
+  - scmapcluster
+- [SingleR](https://github.com/dviraran/SingleR)
+- [scID](https://github.com/BatadaLab/scID)
+- [scVI](https://github.com/YosefLab/scVI)
+- [Cell_BLAST](https://github.com/gao-lab/Cell_BLAST)
+- [Garnett](https://cole-trapnell-lab.github.io/garnett/)
+  - Garnett_CV (without pretrained classifier)
+  - Garnett_Pretrained (with pretrained classifier)
 
 ## Adding new tools
 In order to add a tool to this benchmarking workflow, a rule for this tool

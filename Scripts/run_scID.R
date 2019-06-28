@@ -69,6 +69,7 @@ run_scID<-function(DataPath,LabelsPath,CV_RDataPath,OutputDir,GeneOrderPath = NU
   write.csv(Total_Time_scID,paste0(OutputDir,'/scID_total_time.csv'),row.names = FALSE)
 
 }
+
 if (args[6] == "0") {
   run_scID(args[1], args[2], args[3], args[4])
 } else {
