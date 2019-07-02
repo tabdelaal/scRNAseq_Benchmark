@@ -1,4 +1,4 @@
-dockerTag = "latest"
+dockerTag = "pipeline_0.1"
 
 def feature_ranking(w):
     if "feature_ranking" in config.keys():
