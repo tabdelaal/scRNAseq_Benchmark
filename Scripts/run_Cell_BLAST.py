@@ -46,7 +46,7 @@ def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath 
         features = pd.read_csv(GeneOrderPath,header=0,index_col=None, sep=',')
 
     # read the data and labels
-    data_old = cb.data.ExprDataSet.read_table(DataPath,orientation="cg", sep=",", index_col = 0, header = 0)
+    data_old = cb.data.ExprDataSet.read_table(DataPath,orientation="cg", sep=",", index_col = 0, header = 0, sparsify = True).normalize()
     labels = pd.read_csv(LabelsPath, header=0,index_col=None, sep=',', usecols = col)
     
     data = cb.data.ExprDataSet(data_old.exprs[tokeep],data_old.obs.iloc[tokeep],data_old.var,data_old.uns)
@@ -79,7 +79,6 @@ def run_Cell_BLAST(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath 
         train.obs['cell_type'] = y_train
                 
         start = tm.time()
-        train = train.normalize()
                 
         # reduce dimensions
         num_epoch = 50

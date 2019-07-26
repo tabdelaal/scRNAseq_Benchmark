@@ -45,6 +45,8 @@ def run_scVI(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", 
     # read the feature file
     if (NumGenes > 0):
         features = pd.read_csv(GeneOrderPath,header=0,index_col=None, sep=',')
+        
+    os.chdir(OutputDir)
     
     if (NumGenes == 0):
         #save labels as csv file with header and index column
@@ -101,7 +103,6 @@ def run_scVI(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", 
         pred.extend(y_pred)
     
     #write results
-    os.chdir(OutputDir)
     
     truelab = pd.DataFrame(truelab)
     pred = pd.DataFrame(pred)

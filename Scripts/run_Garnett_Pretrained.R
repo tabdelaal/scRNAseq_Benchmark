@@ -57,7 +57,7 @@ run_Garnett_Pretrained <- function(DataPath, LabelsPath, GenesPath, CV_RDataPath
   
   pbmc_cds <- estimateSizeFactors(pbmc_cds)
   
-  if (human){
+  if (Human){
     pbmc_cds <- classify_cells(pbmc_cds, hsPBMC, db = org.Hs.eg.db, cluster_extend = TRUE, cds_gene_id_type = "SYMBOL")
   } else {
     pbmc_cds <- classify_cells(pbmc_cds, mmLung, db = org.Mm.eg.db, cluster_extend = TRUE, cds_gene_id_type = "SYMBOL")
@@ -67,7 +67,7 @@ run_Garnett_Pretrained <- function(DataPath, LabelsPath, GenesPath, CV_RDataPath
   
   test_time <- as.numeric(end_time - start_time)
   
-  setwd(output_dir)
+  setwd(OutputDir)
   
   write.table(pData(pbmc_cds)$cluster_ext_type, file = "Garnett_Pred_Labels.csv", append = FALSE, quote = TRUE, sep = "\t",
               eol = "\n", na = "NA", dec = ".", row.names = FALSE,
