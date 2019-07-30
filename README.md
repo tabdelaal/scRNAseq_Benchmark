@@ -89,6 +89,42 @@ result <- evaluate('~/Results/TM/scPred_True_Labels.csv', '~/Results/TM/scPred_P
 
 This command will return the corresponding accuracy, median F1-score, F1-scores for all cell populations, % unlabeled cells, and confusion matrix.
 
+### Evaluate Marker-based methods using DE genes
+
+To evaluate the marker-based methods SCINA, DigitalCellSorter and Garnett using DE genes learned from the data, you may follow these steps:
+
+#### Step 1
+
+Apply the ```Cross_Validation``` R function on the corresponding dataset to obtain fixed training and test cell indices, straitified across different cell types. For example, using the Zheng_sorted dataset
+
+```R
+Cross_Validation('~/TM/Labels.csv', 1, '~/Zheng_sorted/')
+```
+
+This command will create a ```CV_folds.RData``` file used as input in Step 2 and 3.
+
+#### Step 2
+
+For each fold use the training data to get the DE genes using the ```DEgenesMAST``` R function, and pass these DE genes to the corresponding method, for example here we use SCINA, to obtain cell prediction for the test data.
+
+```R
+load('CV_folds.RData')
+Data <- read.csv('~/Zheng_sorted/Filtered_DownSampled_SortedPBMC_data',row.names = 1)
+Labels <- as.matrix(read.csv('~/Zheng_sorted/Labels.csv'))
+Labels <- as.vector(Labels[,col_Index])
+Data <- Data[Cells_to_Keep,]
+Labels <- Labels[Cells_to_Keep]
+
+for (i in c(1:n_folds))
+{
+    MarkerGenes <-  DEgenesMAST(t(Data[Train_Idx[[i]],]), Labels[Train_Idx[[i]]], Normalize = TRUE, LogTransform = TRUE)
+    ## write the MarkerGenes into a marker genes file format, depending on the tested method, for example for SCINA
+    write.csv(MarkerGenes, 'MarkerGenes.csv')
+    ## run the SCINA wrapper using these DE marker genes
+    run_SCINA(Data[Test_Idx[[i]],], Labels[Test_Idx[[i]]], 'MarkerGenes.csv', '~/Results/Zheng_sorted/')
+}
+```
+
 ### Snakemake
 
 To support future extension of this benchmarking work with new classifiers and datasets, we provide a Snakemake workflow to automate the performed benchmarking analyses (https://github.com/tabdelaal/scRNAseq_Benchmark/tree/snakemake_and_docker).
