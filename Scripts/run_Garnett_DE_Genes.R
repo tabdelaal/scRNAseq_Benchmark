@@ -1,4 +1,4 @@
-run_Garnett_MarkerGenes <- function(DataPath, LabelsPath, CV_RDataPath, GenesPath, OutputDir, Human = TRUE, NumGenes = 20, Normalize = FALSE, LogTransform = FALSE){
+run_Garnett_DE_Genes <- function(DataPath, LabelsPath, CV_RDataPath, GenesPath, OutputDir, Human = TRUE, NumGenes = 20, Normalize = FALSE, LogTransform = FALSE){
   "
   run Garnett
   Wrapper script to run Garnett on a benchmark dataset with 5-fold cross validation,

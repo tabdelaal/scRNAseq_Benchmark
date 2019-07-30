@@ -1,4 +1,4 @@
-selectMarkerGenes_DCS <- function(DataPath, LabelsPath, CV_RDataPath, OutputDir, Normalize = FALSE, LogTransform = FALSE, NumGenes = 20){
+select_DE_Genes_DCS <- function(DataPath, LabelsPath, CV_RDataPath, OutputDir, Normalize = FALSE, LogTransform = FALSE, NumGenes = 20){
   "
   Wrapper script to select the marker genes for DigitalCellSorter on a benchmark dataset with 5-fold cross validation,
   outputs excel file in the format that DigitalCellSorter can read as input.

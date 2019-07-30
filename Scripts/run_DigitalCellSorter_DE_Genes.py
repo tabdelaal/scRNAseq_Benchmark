@@ -5,7 +5,7 @@ import os
 import time as tm
 import rpy2.robjects as robjects
 
-def run_DigitalCellSorter(DataPath, LabelsPath, CV_RDataPath, GeneListPath, OutputDir, NumGenes = 20):
+def run_DigitalCellSorter_DE_Genes(DataPath, LabelsPath, CV_RDataPath, GeneListPath, OutputDir, NumGenes = 20):
     '''
     run DigitalCellSorter
     Wrapper script to run DigitalCellSorter on a benchmark dataset using a predefined genelist,
