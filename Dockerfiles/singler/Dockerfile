@@ -1,4 +1,4 @@
-FROM debian:9-slim
+FROM debian:9.9-slim
 
 # Install newest R version
 RUN apt-get update && \

@@ -1,4 +1,4 @@
-FROM debian:9-slim
+FROM debian:9.9-slim
 
 # Install newest R version
 RUN apt-get update && \
@@ -18,9 +18,9 @@ COPY Cross_Validation.R \
 
 # Install R packages
 RUN apt-get update && \
-    apt-get install --no-install-recommends --yes make gcc libc6-dev g++ && \
+    apt-get install --no-install-recommends --yes make gcc libc6-dev g++ libxml2-dev && \
     Rscript --vanilla /Scripts/install_packages.R && \
-    apt-get purge --yes make gcc g++ && \
+    apt-get purge --yes make gcc g++ libxml2-dev && \
     apt-get autoremove --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

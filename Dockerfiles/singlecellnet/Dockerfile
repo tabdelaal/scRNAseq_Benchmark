@@ -1,4 +1,4 @@
-FROM debian:9-slim
+FROM debian:9.9-slim
 
 # Install newest R version
 RUN apt-get update && \
@@ -18,9 +18,9 @@ COPY Scripts/run_singleCellNet.R \
 
 # Install R packages
 RUN apt-get update && \
-    apt-get install --no-install-recommends --yes make gcc libc6-dev g++ libcurl4-openssl-dev zlib1g-dev libssl-dev r-base-dev && \
+    apt-get install --no-install-recommends --yes make gcc libc6-dev g++ libcurl4-openssl-dev zlib1g-dev libssl-dev r-base-dev libxml2-dev && \
     Rscript --vanilla /Scripts/install_packages.R && \
-    apt-get purge --yes make gcc g++ zlib1g-dev libcurl4-openssl-dev libc6-dev libssl-dev r-base-dev && \
+    apt-get purge --yes make gcc g++ zlib1g-dev libcurl4-openssl-dev libc6-dev libssl-dev r-base-dev libxml2-dev && \
     apt-get autoremove --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
