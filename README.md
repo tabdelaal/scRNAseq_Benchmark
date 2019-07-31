@@ -57,9 +57,11 @@ one of these tools:
 - kNN50
 - kNN9
 - LDA
+- LDA_rejection (LDA with rejection option)
 - NMC
 - RF
 - SVM
+- SVM (SVM with rejection option)
 - [singleCellNet](https://github.com/pcahan1/singleCellNet)
 - [CHETAH](https://github.com/jdekanter/CHETAH)
 - [scmap](https://github.com/hemberg-lab/scmap)
