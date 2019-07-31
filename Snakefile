@@ -1,4 +1,4 @@
-dockerTag = "pipeline_0.1"
+dockerTag = "latest" #FIXME tagged versions
 
 def feature_ranking(w):
     if "feature_ranking" in config.keys():
@@ -315,6 +315,31 @@ rule kNN50:
     "{params.n_features} "
     "&> {log}"
 
+rule kNN9:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/kNN9/kNN9_pred.csv",
+    true = "{output_dir}/kNN9/kNN9_true.csv",
+    test_time = "{output_dir}/kNN9/kNN9_test_time.csv",
+    training_time = "{output_dir}/kNN9/kNN9_training_time.csv"
+  log: "{output_dir}/kNN9/kNN9.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
+  shell:
+    "python3 Scripts/run_kNN9.py "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/kNN9 "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
 rule Cell_BLAST:
   input:
     datafile = config["datafile"],
@@ -390,6 +415,31 @@ rule LDA:
     "{params.n_features} "
     "&> {log}"
 
+rule LDA_rejection:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/LDA_rejection/LDA_rejection_pred.csv",
+    true = "{output_dir}/LDA_rejection/LDA_rejection_true.csv",
+    test_time = "{output_dir}/LDA_rejection/LDA_rejection_test_time.csv",
+    training_time = "{output_dir}/LDA_rejection/LDA_rejection_training_time.csv"
+  log: "{output_dir}/LDA_rejection/LDA_rejection.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
+  shell:
+    "python3 Scripts/run_LDA_rejection.py "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/LDA_rejection "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
 rule NMC:
   input:
     datafile = config["datafile"],
@@ -461,6 +511,31 @@ rule SVM:
     "{input.labfile} "
     "{input.folds} "
     "{wildcards.output_dir}/SVM "
+    "{input.ranking} "
+    "{params.n_features} "
+    "&> {log}"
+
+rule SVM_rejection:
+  input:
+    datafile = config["datafile"],
+    labfile = config["labfile"],
+    folds = "{output_dir}/CV_folds.RData",
+    ranking = feature_ranking
+  output:
+    pred = "{output_dir}/SVM_rejection/SVM_rejection_pred.csv",
+    true = "{output_dir}/SVM_rejection/SVM_rejection_true.csv",
+    test_time = "{output_dir}/SVM_rejection/SVM_rejection_test_time.csv",
+    training_time = "{output_dir}/SVM_rejection/SVM_rejection_training_time.csv"
+  log: "{output_dir}/SVM_rejection/SVM_rejection.log"
+  params:
+    n_features = config.get("number_of_features", 0)
+  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
+  shell:
+    "python3 Scripts/run_SVM_rejection.py "
+    "{input.datafile} "
+    "{input.labfile} "
+    "{input.folds} "
+    "{wildcards.output_dir}/SVM_rejection "
     "{input.ranking} "
     "{params.n_features} "
     "&> {log}"

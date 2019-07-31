@@ -20,9 +20,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY Scripts/run_kNN50.py \
+     Scripts/run_kNN9.py \
      Scripts/run_LDA.py \
+     Scripts/run_LDA_rejection.py \
      Scripts/run_NMC.py \
      Scripts/run_RF.py \
      Scripts/run_SVM.py \
+     Scripts/run_SVM_rejection.py \
      rank_gene_dropouts.py \
      /Scripts/

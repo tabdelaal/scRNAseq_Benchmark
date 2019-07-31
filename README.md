@@ -55,6 +55,7 @@ one of these tools:
 
 ## Included tools/methods
 - kNN50
+- kNN9
 - LDA
 - NMC
 - RF
