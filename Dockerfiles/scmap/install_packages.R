@@ -3,6 +3,6 @@ withCallingHandlers({
   BiocManager::install(ask = FALSE)
   BiocManager::install("SingleCellExperiment")
   install.packages("devtools", repos="https://cloud.r-project.org/")
-  devtools::install_github("hemberg-lab/scmap")
+  devtools::install_github("hemberg-lab/scmap", ref="1.1.5")
 },
 warning = function(w) stop(w))

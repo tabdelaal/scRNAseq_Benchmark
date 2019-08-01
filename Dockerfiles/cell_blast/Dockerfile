@@ -16,7 +16,7 @@ RUN apt-get update && \
 RUN apt-get update && apt-get install --no-install-recommends --yes build-essential python3-dev libxml2 libxml2-dev zlib1g-dev && \
     pip3 --no-cache-dir install --upgrade pip && \
     pip3 --no-cache-dir install --upgrade setuptools && \
-    pip3 --no-cache-dir install pandas rpy2 scikit-learn statsmodels tensorflow Cell-BLAST && \
+    pip3 --no-cache-dir install pandas rpy2 scikit-learn statsmodels tensorflow Cell-BLAST==0.1.2 && \
     apt-get autoremove --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

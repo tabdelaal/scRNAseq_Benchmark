@@ -105,4 +105,4 @@ def run_LDA_rejection(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPa
     ts_time.to_csv(str(OutputDir / Path("LDA_rejection_test_time.csv")),
                    index = False)
 
-run_LDA(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
+run_LDA_rejection(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))

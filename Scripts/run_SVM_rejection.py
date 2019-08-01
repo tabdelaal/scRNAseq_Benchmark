@@ -10,7 +10,7 @@ import rpy2.robjects as robjects
 from sklearn.calibration import CalibratedClassifierCV
 
 
-def run_SVM(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", NumGenes = 0, Threshold = 0.7):
+def run_SVM_rejection(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", NumGenes = 0, Threshold = 0.7):
     '''
     run baseline classifier: SVM
     Wrapper script to run an SVM classifier with a linear kernel on a benchmark dataset with 5-fold cross validation,
@@ -107,4 +107,4 @@ def run_SVM(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", N
     ts_time.to_csv(str(OutputDir / Path("SVM_rejection_test_time.csv")),
                    index = False)
 
-run_SVM(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
+run_SVM_rejection(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))

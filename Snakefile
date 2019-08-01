@@ -71,7 +71,6 @@ rule generate_dropouts_feature_rankings:
     log: "{output_dir}/rank_genes_dropouts.log"
     singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
     shell:
-        "echo test > {wildcards.output_dir}/test\n"
         "python3 rank_gene_dropouts.py "
         "{input.datafile} "
         "{input.folds} "

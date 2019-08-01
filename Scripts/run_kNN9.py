@@ -99,4 +99,4 @@ def run_kNN9(DataPath, LabelsPath, CV_RDataPath, OutputDir, GeneOrderPath = "", 
     ts_time.to_csv(str(OutputDir / Path("kNN9_test_time.csv")),
                    index = False)
 
-run_kNN50(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
+run_kNN9(argv[1], argv[2], argv[3], argv[4], argv[5], int(argv[6]))
