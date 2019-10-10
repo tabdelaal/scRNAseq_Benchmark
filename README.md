@@ -14,7 +14,7 @@ For more details, please check function documentations.
 
 ### General Usage
 
-To benchmark and fairly evaluate the performance of different classifiers using benchmark-datasets (Filtered datasets can be downloaded from https://zenodo.org/record/2877646#.XN8l__kzapo), apply the following steps:
+To benchmark and fairly evaluate the performance of different classifiers using benchmark-datasets (Filtered datasets can be downloaded from https://zenodo.org/record/3357167), apply the following steps:
 
 #### Step 1
 
