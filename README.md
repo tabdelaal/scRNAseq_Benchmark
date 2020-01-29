@@ -1,5 +1,5 @@
 # A comparison of automatic cell identification methods for single-cell RNA-sequencing data
-We present a comprehensive evaluation of the performance of state-of-the-art classification methods, in addition to general-purpose classifiers, for automatic cell identification single cell RNA-sequencing datasets. Our goal is to provide the community with a fair evaluation of all available methods to facilitate the users’ choice as well as direct further developments to focus on the challenging aspects of automated cell type identification.
+We present a comprehensive evaluation of the performance of state-of-the-art classification methods, in addition to general-purpose classifiers, for automatic cell identification single cell RNA-sequencing datasets. Our goal is to provide the community with a fair evaluation of all available methods to facilitate the users’ choice as well as direct further developments to focus on the challenging aspects of automated cell type identification. (published in genome biology Sep. 2019 https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1795-z)
 
 ### Repository description
 We provide all the scripts to run and evaluate all classifiers, and to reproduce the results introduced in the paper.
