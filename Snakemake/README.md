@@ -3,7 +3,9 @@ Benchmarking classification tools for scRNA-seq data
 
 ## How to use
 [snakemake](https://snakemake.readthedocs.io/en/stable/index.html) and
-[singularity](https://www.sylabs.io/docs/) need to be available on your system.
+[singularity](https://www.sylabs.io/docs/) need to be available on your 
+system. You will need to run this on a linux system, as singularity
+only supports linux.
 
 From the root of this repository:
 ```
