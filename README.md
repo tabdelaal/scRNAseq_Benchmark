@@ -1,5 +1,5 @@
 # A comparison of automatic cell identification methods for single-cell RNA-sequencing data
-We present a comprehensive evaluation of the performance of state-of-the-art classification methods, in addition to general-purpose classifiers, for automatic cell identification single cell RNA-sequencing datasets. Our goal is to provide the community with a fair evaluation of all available methods to facilitate the users’ choice as well as direct further developments to focus on the challenging aspects of automated cell type identification. (published in genome biology Sep. 2019 https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1795-z)
+We present a comprehensive evaluation of the performance of state-of-the-art classification methods, in addition to general-purpose classifiers, for automatic cell identification single cell RNA-sequencing datasets. Our goal is to provide the community with a fair evaluation of all available methods to facilitate the users’ choice as well as direct further developments to focus on the challenging aspects of automated cell type identification. (published in Genome Biology Sep. 2019 <https://doi.org/10.1186/s13059-019-1795-z> )
 
 ### Repository description
 We provide all the scripts to run and evaluate all classifiers, and to reproduce the results introduced in the paper.
@@ -14,7 +14,7 @@ For more details, please check function documentations.
 
 ### General Usage
 
-To benchmark and fairly evaluate the performance of different classifiers using benchmark-datasets (Filtered datasets can be downloaded from https://zenodo.org/record/3357167), apply the following steps:
+To benchmark and fairly evaluate the performance of different classifiers using benchmark-datasets (Filtered datasets can be downloaded from <https://doi.org/10.5281/zenodo.3357167>), apply the following steps:
 
 #### Step 1
 
@@ -127,4 +127,4 @@ for (i in c(1:n_folds))
 
 ### Snakemake
 
-To support future extension of this benchmarking work with new classifiers and datasets, we provide a Snakemake workflow to automate the performed benchmarking analyses (https://github.com/tabdelaal/scRNAseq_Benchmark/tree/snakemake_and_docker).
+To support future extension of this benchmarking work with new classifiers and datasets, we provide a [Snakemake workflow to automate the performed benchmarking analyses](https://github.com/tabdelaal/scRNAseq_Benchmark/tree/snakemake_and_docker).
